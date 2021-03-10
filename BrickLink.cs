@@ -25,6 +25,8 @@ namespace BrickLink
     public static class BricklinkExcelIntegration
     {
         // TODO: In this section, you will need to enter the various secrets and keys that are assigned to you by Bricklink
+        // For more information see: https://www.bricklink.com/v2/api/welcome.page
+
         const string consumerKey = "";
         const string consumerSecret = "";
         const string tokenValue = "";
