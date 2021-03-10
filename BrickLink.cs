@@ -172,6 +172,7 @@ namespace BrickLink
             }
             else
             {
+                // Added this sleep function as BrickLink API expect a 1 second delay between different call 
                 Thread.Sleep(500);
                 return GetSetName(name);
             }
@@ -196,6 +197,7 @@ namespace BrickLink
             }
             else
             {
+                // Added this sleep function as BrickLink API expect a 1 second delay between different call 
                 Thread.Sleep(500);
                 return GetSetImage(name);
             }
@@ -221,6 +223,7 @@ namespace BrickLink
             }
             else
             {
+                // Added this sleep function as BrickLink API expect a 1 second delay between different call 
                 Thread.Sleep(500);
                 return GetSetYear(name);
             }
@@ -246,6 +249,7 @@ namespace BrickLink
             }
             else
             {
+                // Added this sleep function as BrickLink API expect a 1 second delay between different call 
                 Thread.Sleep(500);
                 return GetSetPrice(name);
             }
