@@ -1,9 +1,13 @@
 ﻿// ***************************************************************************************
-// * BrickLink Excel function intgration 
+// * BrickLink Excel function integration 
 // * Version 1.0 3/10/2021
 // * Itamar Budin lego.c.israel@gmail.com
-// * Using code samples from multiple resoruce (see internal comments for reffrence) 
+// * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
+// This solution is using the Excel-DNA plug-in. For more details, see the ExcelDna.AddIn.md file
+
+// I am not a developer but know how to write basic code so please excuse any bad code writing :)
+
 
 
 using Nancy.Helpers;
@@ -20,6 +24,7 @@ namespace BrickLink
 {
     public static class BricklinkExcelIntegration
     {
+        // TODO: In this section, you will need to enter the various secrets and keys that are assigned to you by Bricklink
         const string consumerKey = "";
         const string consumerSecret = "";
         const string tokenValue = "";
@@ -38,6 +43,9 @@ namespace BrickLink
         }
         private static readonly string[] UriRfc3986CharsToEscape = new[] { "!", "*", "'", "(", ")" };
 
+        // The following section was build using the example shown here: https://stackoverflow.com/questions/47378232/rest-api-authentication-oauth-1-0-using-c-sharp
+        // Original Code written by https://stackoverflow.com/users/3854205/halvorsen THANK YOU!
+
         private static string EscapeUriDataStringRfc3986(string value)
         {
             StringBuilder escaped = new StringBuilder(Uri.EscapeDataString(value));
@@ -48,8 +56,37 @@ namespace BrickLink
             return escaped.ToString();
         }
 
+        // This method will connect to the BrickLink API and pull the associated record including the entire payload which will help us grab individual data point like the set name, release date and average price
+        // Example: 
+        /*
+         * https://api.bricklink.com/api/store/v1/items/set/10030-1
+         * 
+         *     {
+                "meta": {
+                    "description": "OK",
+                    "message": "OK",
+                    "code": 200
+                },
+                "data": {
+                    "no": "10030-1",
+                    "name": "Imperial Star Destroyer - UCS",
+                    "type": "SET",
+                    "category_id": 65,
+                    "image_url": "//img.bricklink.com/SL/10030-1.jpg",
+                    "thumbnail_url": "//img.bricklink.com/S/10030-1.gif",
+                    "weight": "9093.00",
+                    "dim_x": "58.80",
+                    "dim_y": "50.50",
+                    "dim_z": "21.00",
+                    "year_released": 2002,
+                    "description": "<p />Instructions for this set came in two forms.  A 'classic bound' or glued spine version, and a 'spiral bound' version.\r\n<p />The early production runs of this set featured Light Gray elements but subsequent production runs have contained varying mixtures of Light Gray and Light Bluish Gray elements.",
+                    "is_obsolete": false
+                }
+            }
+        */
         public static string GetSetInformation(string url, string requestType)
         {
+            // This section will determine if the original request was made using the GetSetPrice function and will change the base URL to retrieve the pricing information 
             if (requestType != "info")
             {
                 url += "/price";
@@ -121,6 +158,7 @@ namespace BrickLink
 
         }
 
+        //This function will return the item name
         public static string GetSetName(string name)
         {
             string setInformation = GetSetInformation(GetURL(name), "info");
@@ -137,6 +175,7 @@ namespace BrickLink
             }
         }
 
+        //This function will return the item image
         public static string GetSetImage(string name)
         {
             string setInformation = GetSetInformation(GetURL(name), "info");
@@ -161,6 +200,7 @@ namespace BrickLink
 
         }
 
+        //This function will return the item release year
         public static string GetSetYear(string name)
         {
             string setInformation = GetSetInformation(GetURL(name), "info");
@@ -184,6 +224,8 @@ namespace BrickLink
             }
 
         }
+
+        //This function will return the item average price. Note this code is designed to pull the average price for a new set. Some older sets may not have an entry in BrinkLink so you may want to change this method
         public static string GetSetPrice(string name)
         {
             string setInformation = GetSetInformation(GetURL(name), "price");
@@ -207,12 +249,14 @@ namespace BrickLink
             }
         }
 
+        // This function will build the right API URL based on the set identifier (set#, set code etc.)
         private static string GetURL(string name)
         {
             string url;
             string setTypeValue = GetSetType(name);
             if (setTypeValue == "SET")
             {
+                // Some items are categorized as sets even if they don't have an actual number (10030) next to them. this section will help identify them and build the right URL for them
                 if (Char.IsLetter(name[0]))
                 {
                     url = "https://api.bricklink.com/api/store/v1/items/set/" + name;
@@ -233,6 +277,10 @@ namespace BrickLink
             return url;
         }
 
+        // This function will return the item type
+        // As BrickLink doesn't have an API method to identify an item based on the unique identifier (set # etc.), we will need to use a web client to try to see if we can use BrickLink 
+        // URL structure to get to the product page. 
+        // Note that this will work using the current BrickLink URL structure and if BrickLink will go and change the pages structure, especially the <Title> tags, this section will need to be updated
         private static string GetSetType(string name)
         {
 
