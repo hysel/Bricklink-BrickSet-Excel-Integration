@@ -291,6 +291,9 @@ namespace BrickLink
         {
 
             WebClient myWebClient = new WebClient();
+            // Added support for TLS 1.2
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            ServicePointManager.DefaultConnectionLimit = 9999;
             string responseBodySet = myWebClient.DownloadString("https://www.bricklink.com/v2/catalog/catalogitem.page?S=" + name);
             string responseBodyGear = myWebClient.DownloadString("https://www.bricklink.com/v2/catalog/catalogitem.page?G=" + name);
             string returnValue = "";
