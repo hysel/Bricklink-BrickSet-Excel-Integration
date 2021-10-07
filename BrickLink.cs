@@ -188,7 +188,7 @@ namespace BrickLink
                 string value = (string)obj["data"]["thumbnail_url"];
                 if (value != null)
                 {
-                    return "http:" + value;
+                    return "https:" + value;
                 }
                 else
                 {
