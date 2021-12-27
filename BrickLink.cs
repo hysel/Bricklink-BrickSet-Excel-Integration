@@ -25,7 +25,7 @@ namespace BrickLink
     public static class BricklinkExcelIntegration
     {
         // TODO: In this section, you will need to enter the various secrets and keys that are assigned to you by Bricklink
-        // For more information see: https://www.bricklink.com/v2/api/welcome.page
+        // For more information see: https://www.bricklink.com/v3/api.page
 
         const string consumerKey = "";
         const string consumerSecret = "";
@@ -255,6 +255,52 @@ namespace BrickLink
             }
         }
 
+        //This function will return the item category ID. 
+        //This will call the main item API to get the set Category ID and use the /categories API to return the category name 
+        public static string GetSetCategory(string name)
+        {
+            string setInformation = GetSetInformation(GetURL(name), "info");
+            var obj = JObject.Parse(setInformation);
+            if (!obj.ToString().Contains("TIMESTAMP"))
+            {
+                string category_id = (string)obj["data"]["category_id"];
+                if (category_id != null)
+                {
+                    string catURL = "https://api.bricklink.com/api/store/v1/categories/" + category_id;
+                    string categoryInformation = GetSetInformation(catURL, "info");
+                    obj = JObject.Parse(categoryInformation);
+                    if (!obj.ToString().Contains("TIMESTAMP"))
+                    {
+                        string categoryName = (string)obj["data"]["category_name"];
+                        if (categoryName != null)
+                        {
+                            return categoryName;
+                        }
+                        else
+                        {
+                            return "no results";
+                        }
+                    }
+                    else
+                    {
+                        // Added this sleep function as BrickLink API expect a 1 second delay between different call 
+                        Thread.Sleep(500);
+                        return GetSetCategory(name);
+                    }
+                }
+                else
+                {
+                    return "no results";
+                }
+            }
+            else
+            {
+                // Added this sleep function as BrickLink API expect a 1 second delay between different call 
+                Thread.Sleep(500);
+                return GetSetCategory(name);
+            }
+        }
+
         // This function will build the right API URL based on the set identifier (set#, set code etc.)
         private static string GetURL(string name)
         {
@@ -280,6 +326,7 @@ namespace BrickLink
             {
                 url = "https://api.bricklink.com/api/store/v1/items/minifig/" + name;
             }
+
             return url;
         }
 
@@ -318,6 +365,8 @@ namespace BrickLink
             return returnValue;
 
         }
+
+
 
         public static void Main()
         {
