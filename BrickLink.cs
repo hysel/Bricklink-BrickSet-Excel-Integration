@@ -13,12 +13,14 @@
 using Nancy.Helpers;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Xml;
 
 namespace BrickLink
 {
@@ -256,7 +258,7 @@ namespace BrickLink
         }
 
         //This function will return the item category ID. 
-        //This will call the main item API to get the set Category ID and use the /categories API to return the category name 
+        //It will compare it to the bricklinkcategorylist.xml file (which is a dump of the /categories API call from bricklink) and return the category name
         public static string GetSetCategory(string name)
         {
             string setInformation = GetSetInformation(GetURL(name), "info");
@@ -266,26 +268,27 @@ namespace BrickLink
                 string category_id = (string)obj["data"]["category_id"];
                 if (category_id != null)
                 {
-                    string catURL = "https://api.bricklink.com/api/store/v1/categories/" + category_id;
-                    string categoryInformation = GetSetInformation(catURL, "info");
-                    obj = JObject.Parse(categoryInformation);
-                    if (!obj.ToString().Contains("TIMESTAMP"))
+                    XmlReader xmlFile;
+                    System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
+                    xmlFile = XmlReader.Create(a.GetManifestResourceStream("BrickLink.bricklinkcategorylist.xml"), new XmlReaderSettings());
+                    DataSet ds = new DataSet();
+                    DataView dv;
+                    ds.ReadXml(xmlFile);
+
+                    dv = new DataView(ds.Tables[0])
                     {
-                        string categoryName = (string)obj["data"]["category_name"];
-                        if (categoryName != null)
-                        {
-                            return categoryName;
-                        }
-                        else
-                        {
-                            return "no results";
-                        }
+                        Sort = "category_id"
+                    };
+
+                    int index = dv.Find(category_id);
+
+                    if (index == -1)
+                    {
+                        return "no results";
                     }
                     else
                     {
-                        // Added this sleep function as BrickLink API expect a 1 second delay between different call 
-                        Thread.Sleep(500);
-                        return GetSetCategory(name);
+                        return dv[index]["category_name"].ToString();
                     }
                 }
                 else

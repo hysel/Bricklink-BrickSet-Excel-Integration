@@ -1,0 +1,2608 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+  <row>
+    <category_id>1</category_id>
+    <category_name>Antenna</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>2</category_id>
+    <category_name>Baseplate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>3</category_id>
+    <category_name>Boat</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>4</category_id>
+    <category_name>Bracket</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>5</category_id>
+    <category_name>Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>6</category_id>
+    <category_name>Arch</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>7</category_id>
+    <category_name>Modified Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>8</category_id>
+    <category_name>round brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>9</category_id>
+    <category_name>Castle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>10</category_id>
+    <category_name>Container</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>11</category_id>
+    <category_name>Cylinder</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>12</category_id>
+    <category_name>Door</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>13</category_id>
+    <category_name>Fence</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>14</category_id>
+    <category_name>Magnet</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>16</category_id>
+    <category_name>Minifigure Headgear</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>18</category_id>
+    <category_name>Minifigure Utensil</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>19</category_id>
+    <category_name>Minifigure Weapon</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>20</category_id>
+    <category_name>Minifigure Body Part</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>21</category_id>
+    <category_name>Cone</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>22</category_id>
+    <category_name>Hinge</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>25</category_id>
+    <category_name>Plant</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>26</category_id>
+    <category_name>Plate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>27</category_id>
+    <category_name>Plate,Modified Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>28</category_id>
+    <category_name>Plate Round</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>30</category_id>
+    <category_name>Propeller</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>31</category_id>
+    <category_name>Slope</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>32</category_id>
+    <category_name>Slope Inverted</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>33</category_id>
+    <category_name>Slope Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>34</category_id>
+    <category_name>Space</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>36</category_id>
+    <category_name>Technic</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>37</category_id>
+    <category_name>Tile</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>38</category_id>
+    <category_name>Tile,Modified Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>39</category_id>
+    <category_name>Decorated Tile</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>40</category_id>
+    <category_name>Turntable</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>42</category_id>
+    <category_name>Wedge</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>43</category_id>
+    <category_name>Wheel</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>45</category_id>
+    <category_name>Arm</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>46</category_id>
+    <category_name>Bar</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>48</category_id>
+    <category_name>Belville</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>53</category_id>
+    <category_name>Adventurers</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>54</category_id>
+    <category_name>Aquazone</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>59</category_id>
+    <category_name>Mindstorms</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>60</category_id>
+    <category_name>Model Team</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>61</category_id>
+    <category_name>Pirates</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>62</category_id>
+    <category_name>Rock Raiders</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>63</category_id>
+    <category_name>Service Packs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>65</category_id>
+    <category_name>Star Wars</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>67</category_id>
+    <category_name>Town</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>69</category_id>
+    <category_name>Western</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>72</category_id>
+    <category_name>Vehicle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>73</category_id>
+    <category_name>Conveyor</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>74</category_id>
+    <category_name>Crane</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>76</category_id>
+    <category_name>Flag</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>77</category_id>
+    <category_name>Vehicle Mudguard</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>78</category_id>
+    <category_name>FreeStyle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>79</category_id>
+    <category_name>Garage</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>81</category_id>
+    <category_name>Window Glass &amp; Shutter</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>83</category_id>
+    <category_name>Hinge Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>84</category_id>
+    <category_name>Window Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>85</category_id>
+    <category_name>Homemaker</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>86</category_id>
+    <category_name>Animal Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>87</category_id>
+    <category_name>Hose</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>88</category_id>
+    <category_name>String Reel / Winch</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>90</category_id>
+    <category_name>Ladder</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>91</category_id>
+    <category_name>Panel</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>93</category_id>
+    <category_name>Aircraft</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>95</category_id>
+    <category_name>Plant, Tree</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>98</category_id>
+    <category_name>Road Sign</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>99</category_id>
+    <category_name>Rock</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>102</category_id>
+    <category_name>Scala</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>103</category_id>
+    <category_name>Stairs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>105</category_id>
+    <category_name>Support</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>106</category_id>
+    <category_name>Tail</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>107</category_id>
+    <category_name>Tap</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>111</category_id>
+    <category_name>Tire &amp; Tread</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>112</category_id>
+    <category_name>Hook</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>113</category_id>
+    <category_name>Window</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>114</category_id>
+    <category_name>Wing</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>115</category_id>
+    <category_name>Windscreen</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>116</category_id>
+    <category_name>Dish</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>117</category_id>
+    <category_name>Tile, Round</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>118</category_id>
+    <category_name>Brick, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>119</category_id>
+    <category_name>Electric</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>121</category_id>
+    <category_name>Electric, Motor</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>122</category_id>
+    <category_name>Electric, Train</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>123</category_id>
+    <category_name>Electric, Light &amp; Sound</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>124</category_id>
+    <category_name>Train</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>128</category_id>
+    <category_name>Train, Track</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>130</category_id>
+    <category_name>Baseplate, Road</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>131</category_id>
+    <category_name>Vehicle, Base</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>132</category_id>
+    <category_name>Window, Glass &amp; Shutter, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>133</category_id>
+    <category_name>Technic, Connector</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>134</category_id>
+    <category_name>Technic, Axle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>135</category_id>
+    <category_name>Technic, Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>136</category_id>
+    <category_name>Technic, Gear</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>137</category_id>
+    <category_name>Technic, Liftarm</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>138</category_id>
+    <category_name>Technic, Link</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>139</category_id>
+    <category_name>Technic, Pin</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>140</category_id>
+    <category_name>Technic, Plate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>141</category_id>
+    <category_name>Technic, Steering</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>142</category_id>
+    <category_name>Minifigure, Body Wear</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>143</category_id>
+    <category_name>(Other)</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>145</category_id>
+    <category_name>Animal, Water</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>146</category_id>
+    <category_name>Animal, Air</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>147</category_id>
+    <category_name>Animal, Land</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>148</category_id>
+    <category_name>Animal, Body Part</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>149</category_id>
+    <category_name>Disney&#x27;s Mickey Mouse</category_name>
+    <parent_id>878</parent_id>
+  </row>
+  <row>
+    <category_id>150</category_id>
+    <category_name>Minifigure, Torso</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>152</category_id>
+    <category_name>Znap</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>153</category_id>
+    <category_name>Fabuland</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>154</category_id>
+    <category_name>Technic, Panel</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>155</category_id>
+    <category_name>Basic</category_name>
+    <parent_id>422</parent_id>
+  </row>
+  <row>
+    <category_id>157</category_id>
+    <category_name>Time Cruisers</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>159</category_id>
+    <category_name>Pneumatic</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>160</category_id>
+    <category_name>Sticker Sheet</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>161</category_id>
+    <category_name>Plastic</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>162</category_id>
+    <category_name>Cloth</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>166</category_id>
+    <category_name>Educational &amp; Dacta</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>167</category_id>
+    <category_name>Duplo</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>169</category_id>
+    <category_name>Sculptures</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>170</category_id>
+    <category_name>Alpha Team</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>171</category_id>
+    <category_name>Creator</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>174</category_id>
+    <category_name>Studios</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>175</category_id>
+    <category_name>Food &amp; Drink</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>179</category_id>
+    <category_name>Racers</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>180</category_id>
+    <category_name>Software</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>183</category_id>
+    <category_name>Dinosaurs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>184</category_id>
+    <category_name>Animal, Dinosaur</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>225</category_id>
+    <category_name>Riding Cycle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>226</category_id>
+    <category_name>Hobby Sets</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>227</category_id>
+    <category_name>Harry Potter</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>229</category_id>
+    <category_name>Rubber Band &amp; Belt</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>231</category_id>
+    <category_name>String &amp; Net</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>234</category_id>
+    <category_name>Foam</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>235</category_id>
+    <category_name>Bionicle, Kanohi Mask</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>237</category_id>
+    <category_name>Monorail</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>238</category_id>
+    <category_name>Minifigure, Head</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>241</category_id>
+    <category_name>Pen</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>242</category_id>
+    <category_name>Technic, Figure Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>243</category_id>
+    <category_name>Baseplate, Raised</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>246</category_id>
+    <category_name>Paper</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>252</category_id>
+    <category_name>Game</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>254</category_id>
+    <category_name>Learning Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>273</category_id>
+    <category_name>Bionicle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>277</category_id>
+    <category_name>Legoland</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>284</category_id>
+    <category_name>Ninja</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>290</category_id>
+    <category_name>Value Packs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>293</category_id>
+    <category_name>Baby</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>294</category_id>
+    <category_name>Primo</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>317</category_id>
+    <category_name>Idea Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>331</category_id>
+    <category_name>Comic Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>332</category_id>
+    <category_name>Informational Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>333</category_id>
+    <category_name>Card, Game Card</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>334</category_id>
+    <category_name>Key Chain</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>336</category_id>
+    <category_name>Clock</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>340</category_id>
+    <category_name>1965</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>341</category_id>
+    <category_name>1966</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>342</category_id>
+    <category_name>1967</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>343</category_id>
+    <category_name>1968</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>344</category_id>
+    <category_name>1969</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>345</category_id>
+    <category_name>1970</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>346</category_id>
+    <category_name>1971</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>347</category_id>
+    <category_name>1972</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>348</category_id>
+    <category_name>1973</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>349</category_id>
+    <category_name>1974</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>350</category_id>
+    <category_name>1975</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>351</category_id>
+    <category_name>1976</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>352</category_id>
+    <category_name>1977</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>353</category_id>
+    <category_name>1978</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>354</category_id>
+    <category_name>1979</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>355</category_id>
+    <category_name>1980</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>356</category_id>
+    <category_name>1981</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>357</category_id>
+    <category_name>1982</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>358</category_id>
+    <category_name>1983</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>359</category_id>
+    <category_name>1984</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>360</category_id>
+    <category_name>1985</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>361</category_id>
+    <category_name>1986</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>362</category_id>
+    <category_name>1987</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>363</category_id>
+    <category_name>1988</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>364</category_id>
+    <category_name>1989</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>365</category_id>
+    <category_name>1990</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>366</category_id>
+    <category_name>1991</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>367</category_id>
+    <category_name>1992</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>368</category_id>
+    <category_name>1993</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>369</category_id>
+    <category_name>1994</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>370</category_id>
+    <category_name>1995</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>371</category_id>
+    <category_name>1996</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>372</category_id>
+    <category_name>1997</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>373</category_id>
+    <category_name>1998</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>374</category_id>
+    <category_name>1999</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>375</category_id>
+    <category_name>2000</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>377</category_id>
+    <category_name>2001</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>378</category_id>
+    <category_name>2002</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>379</category_id>
+    <category_name>Roof</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>380</category_id>
+    <category_name>Card, Trading Card</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>388</category_id>
+    <category_name>Building Set with People</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>390</category_id>
+    <category_name>Holiday &amp; Event</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>394</category_id>
+    <category_name>Minitalia</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>395</category_id>
+    <category_name>Samsonite</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>398</category_id>
+    <category_name>Human Furniture</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>399</category_id>
+    <category_name>Storage</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>411</category_id>
+    <category_name>Electric, Battery Box</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>412</category_id>
+    <category_name>Belville, Figure Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>413</category_id>
+    <category_name>Scala, Figure Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>417</category_id>
+    <category_name>Duplo, Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>418</category_id>
+    <category_name>Minifigure, Shield</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>420</category_id>
+    <category_name>Duplo, Animal</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>422</category_id>
+    <category_name>Universal Building Set</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>423</category_id>
+    <category_name>Classic</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>424</category_id>
+    <category_name>HO 1:87 Vehicles</category_name>
+    <parent_id>423</parent_id>
+  </row>
+  <row>
+    <category_id>429</category_id>
+    <category_name>Jumbo Bricks</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>436</category_id>
+    <category_name>Spybotics</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>437</category_id>
+    <category_name>Explore</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>438</category_id>
+    <category_name>Slope, Curved</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>439</category_id>
+    <category_name>Soft Bricks</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>440</category_id>
+    <category_name>Duplo, Brick, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>441</category_id>
+    <category_name>Duplo, Train</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>443</category_id>
+    <category_name>Puzzle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>444</category_id>
+    <category_name>Galidor</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>445</category_id>
+    <category_name>Patch &amp; Pin</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>447</category_id>
+    <category_name>School Supplies</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>449</category_id>
+    <category_name>Island Xtreme Stunts</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>450</category_id>
+    <category_name>Track System</category_name>
+    <parent_id>179</parent_id>
+  </row>
+  <row>
+    <category_id>461</category_id>
+    <category_name>Panel, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>462</category_id>
+    <category_name>Magazine</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>463</category_id>
+    <category_name>Electric, Programmable</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>464</category_id>
+    <category_name>Bead</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>469</category_id>
+    <category_name>Spider-Man</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>472</category_id>
+    <category_name>Card, Postcard</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>473</category_id>
+    <category_name>Sports</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>478</category_id>
+    <category_name>Bulk Bricks</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>479</category_id>
+    <category_name>Cockpit</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>482</category_id>
+    <category_name>Discovery</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>483</category_id>
+    <category_name>Technic, Flex Cable</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>484</category_id>
+    <category_name>Minifigure, Legs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>485</category_id>
+    <category_name>Minifigure, Torso Assembly</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>486</category_id>
+    <category_name>Designer Sets</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>487</category_id>
+    <category_name>Duplo, Plate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>488</category_id>
+    <category_name>Duplo, Vehicle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>490</category_id>
+    <category_name>Clikits</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>491</category_id>
+    <category_name>2003</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>497</category_id>
+    <category_name>Inventor</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>498</category_id>
+    <category_name>Backpacks &amp; Lunchboxes</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>503</category_id>
+    <category_name>Poster</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>504</category_id>
+    <category_name>Motor, Non-Electric</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>505</category_id>
+    <category_name>Story Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>506</category_id>
+    <category_name>Duplo, Brick, Promotional</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>512</category_id>
+    <category_name>Toy, Plush</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>513</category_id>
+    <category_name>Media Audio &amp; Video</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>514</category_id>
+    <category_name>Throwing Disk</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>515</category_id>
+    <category_name>2004</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>516</category_id>
+    <category_name>4 Juniors</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>517</category_id>
+    <category_name>Watch</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>521</category_id>
+    <category_name>Photo Frame &amp; Holder</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>522</category_id>
+    <category_name>Hose, Ribbed 7mm D.</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>524</category_id>
+    <category_name>Duplo, Toolo</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>525</category_id>
+    <category_name>Human Toiletries</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>526</category_id>
+    <category_name>Retail Display Flag</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>527</category_id>
+    <category_name>Hose, Soft Axle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>528</category_id>
+    <category_name>Hose, Rigid 3mm D.</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>529</category_id>
+    <category_name>Hose, Soft 3mm D.</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>530</category_id>
+    <category_name>Hose, Pneumatic 4mm D.</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>532</category_id>
+    <category_name>Wheel &amp; Tire Assembly</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>534</category_id>
+    <category_name>Brick, Promotional</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>535</category_id>
+    <category_name>Brick, Modified, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>537</category_id>
+    <category_name>Quatro</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>538</category_id>
+    <category_name>Duplo, Tile, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>539</category_id>
+    <category_name>Retail Display</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>540</category_id>
+    <category_name>Door, Frame</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>542</category_id>
+    <category_name>Technic, Shock Absorber</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>543</category_id>
+    <category_name>Clothing, Adult</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>544</category_id>
+    <category_name>2005</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>545</category_id>
+    <category_name>FIRST LEGO League</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>548</category_id>
+    <category_name>Vikings</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>551</category_id>
+    <category_name>1964</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>552</category_id>
+    <category_name>Coloring Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>553</category_id>
+    <category_name>1963</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>554</category_id>
+    <category_name>1962</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>555</category_id>
+    <category_name>1961</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>556</category_id>
+    <category_name>1960</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>557</category_id>
+    <category_name>1959</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>558</category_id>
+    <category_name>1958</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>559</category_id>
+    <category_name>1957</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>560</category_id>
+    <category_name>1956</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>561</category_id>
+    <category_name>1955</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>563</category_id>
+    <category_name>Dino Attack</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>564</category_id>
+    <category_name>Card, Collector Card</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>565</category_id>
+    <category_name>2006</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>566</category_id>
+    <category_name>Factory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>567</category_id>
+    <category_name>Dino 2010</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>568</category_id>
+    <category_name>Exo-Force</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>569</category_id>
+    <category_name>Large Figure Part</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>570</category_id>
+    <category_name>Batman I</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>572</category_id>
+    <category_name>Legoland Parks</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>573</category_id>
+    <category_name>SpongeBob SquarePants</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>574</category_id>
+    <category_name>Avatar</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>575</category_id>
+    <category_name>Clikits, Icon</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>576</category_id>
+    <category_name>Curriculum Activity Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>578</category_id>
+    <category_name>Wedge, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>579</category_id>
+    <category_name>Windscreen, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>581</category_id>
+    <category_name>2007</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>582</category_id>
+    <category_name>Stickered Assembly</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>583</category_id>
+    <category_name>Wedge, Plate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>585</category_id>
+    <category_name>Duplo, Figure Wear &amp; Utensil</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>586</category_id>
+    <category_name>Play Wear &amp; Weaponry</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>594</category_id>
+    <category_name>Puzzle Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>600</category_id>
+    <category_name>Town Plan</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>601</category_id>
+    <category_name>2008</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>604</category_id>
+    <category_name>Money and Coin Bank</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>605</category_id>
+    <category_name>Indiana Jones</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>606</category_id>
+    <category_name>Minifigure, Head,Modified Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>608</category_id>
+    <category_name>Speed Racer</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>609</category_id>
+    <category_name>Agents</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>617</category_id>
+    <category_name>Dino</category_name>
+    <parent_id>167</parent_id>
+  </row>
+  <row>
+    <category_id>623</category_id>
+    <category_name>X-Pod</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>628</category_id>
+    <category_name>1950</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>629</category_id>
+    <category_name>Architecture</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>636</category_id>
+    <category_name>Minifigure, Headgear Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>638</category_id>
+    <category_name>Technic, Disk</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>639</category_id>
+    <category_name>Duplo, Boat</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>640</category_id>
+    <category_name>Duplo, Aircraft</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>641</category_id>
+    <category_name>Duplo, Furniture</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>642</category_id>
+    <category_name>Door, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>643</category_id>
+    <category_name>Container, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>645</category_id>
+    <category_name>Toy, Early</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>646</category_id>
+    <category_name>Electronics</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>647</category_id>
+    <category_name>2009</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>648</category_id>
+    <category_name>Bedding</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>679</category_id>
+    <category_name>Toy, Fast Food</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>683</category_id>
+    <category_name>Glued Model</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>689</category_id>
+    <category_name>Power Miners</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>707</category_id>
+    <category_name>Duplo, Doll</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>710</category_id>
+    <category_name>Modular Buildings</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>712</category_id>
+    <category_name>Video Game</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>721</category_id>
+    <category_name>Power Functions</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>727</category_id>
+    <category_name>Modulex</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>728</category_id>
+    <category_name>Modulex, Tile, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>729</category_id>
+    <category_name>Modulex, Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>730</category_id>
+    <category_name>Modulex, Window</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>731</category_id>
+    <category_name>Ben 10</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>732</category_id>
+    <category_name>Toy Story</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>733</category_id>
+    <category_name>Atlantis</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>734</category_id>
+    <category_name>Prince of Persia</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>735</category_id>
+    <category_name>Electric, Wire &amp; Connector</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>736</category_id>
+    <category_name>Brick, Round, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>738</category_id>
+    <category_name>Flag, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>740</category_id>
+    <category_name>Technic, Panel, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>741</category_id>
+    <category_name>Tail, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>743</category_id>
+    <category_name>2010</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>745</category_id>
+    <category_name>Building Event Instructions</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>746</category_id>
+    <category_name>Collectible Minifigures</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>747</category_id>
+    <category_name>World Racers</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>748</category_id>
+    <category_name>Cars</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>749</category_id>
+    <category_name>Hero Factory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>755</category_id>
+    <category_name>Universe</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>756</category_id>
+    <category_name>2011</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>757</category_id>
+    <category_name>Pharaoh&#x27;s Quest</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>759</category_id>
+    <category_name>Ninjago</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>761</category_id>
+    <category_name>Pirates of the Caribbean</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>764</category_id>
+    <category_name>Master Builder Academy</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>766</category_id>
+    <category_name>Activity Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>767</category_id>
+    <category_name>2012</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>768</category_id>
+    <category_name>Super Heroes</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>771</category_id>
+    <category_name>Friends</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>775</category_id>
+    <category_name>Slope, Curved, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>776</category_id>
+    <category_name>Slope, Inverted, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>777</category_id>
+    <category_name>Technic, Liftarm, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>778</category_id>
+    <category_name>Tile, Modified, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>779</category_id>
+    <category_name>Dish, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>780</category_id>
+    <category_name>Vehicle, Mudguard, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>781</category_id>
+    <category_name>Monster Fighters</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>786</category_id>
+    <category_name>2013</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>787</category_id>
+    <category_name>Legends of Chima</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>789</category_id>
+    <category_name>The Hobbit and The Lord of the Rings</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>790</category_id>
+    <category_name>Teenage Mutant Ninja Turtles</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>795</category_id>
+    <category_name>The Lone Ranger</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>797</category_id>
+    <category_name>1954</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>801</category_id>
+    <category_name>Minecraft</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>802</category_id>
+    <category_name>Muji</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>804</category_id>
+    <category_name>The LEGO Movie</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>805</category_id>
+    <category_name>2014</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>807</category_id>
+    <category_name>The Simpsons</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>808</category_id>
+    <category_name>Mixels</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>809</category_id>
+    <category_name>Juniors</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>812</category_id>
+    <category_name>Tile, Round, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>815</category_id>
+    <category_name>Ultra Agents</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>817</category_id>
+    <category_name>LEGO Ideas &amp;#40;CUUSOO&amp;#41;</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>822</category_id>
+    <category_name>Fusion</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>826</category_id>
+    <category_name>2015</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>842</category_id>
+    <category_name>Speed Champions</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>843</category_id>
+    <category_name>Elves</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>845</category_id>
+    <category_name>Duplo, Cloth</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>846</category_id>
+    <category_name>Duplo, Baseplate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>847</category_id>
+    <category_name>Minifigure, Hair</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>848</category_id>
+    <category_name>Retail Display Case</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>850</category_id>
+    <category_name>Jurassic World</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>856</category_id>
+    <category_name>Scooby-Doo</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>860</category_id>
+    <category_name>Dimensions</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>868</category_id>
+    <category_name>Nexo Knights</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>869</category_id>
+    <category_name>2016</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>870</category_id>
+    <category_name>Ghostbusters</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>876</category_id>
+    <category_name>The Angry Birds Movie</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>878</category_id>
+    <category_name>Disney</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>885</category_id>
+    <category_name>Plate, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>890</category_id>
+    <category_name>Plate, Modified, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>893</category_id>
+    <category_name>DC Super Hero Girls</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>901</category_id>
+    <category_name>2017</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>903</category_id>
+    <category_name>BrickHeadz</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>911</category_id>
+    <category_name>Mini Doll, Body Part</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>912</category_id>
+    <category_name>Mini Doll, Body Wear</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>913</category_id>
+    <category_name>Mini Doll, Hair</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>914</category_id>
+    <category_name>Mini Doll, Head</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>915</category_id>
+    <category_name>Mini Doll, Headgear</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>916</category_id>
+    <category_name>Mini Doll, Legs</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>917</category_id>
+    <category_name>Mini Doll, Torso</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>919</category_id>
+    <category_name>Cities of Wonders</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>920</category_id>
+    <category_name>The LEGO Ninjago Movie</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>921</category_id>
+    <category_name>BOOST</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>925</category_id>
+    <category_name>Powerpuff Girls</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>926</category_id>
+    <category_name>Cylinder, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>927</category_id>
+    <category_name>Building Bigger Thinking</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>930</category_id>
+    <category_name>2018</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>943</category_id>
+    <category_name>Minifigure, Utensil, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>957</category_id>
+    <category_name>The Incredibles</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>961</category_id>
+    <category_name>Special Assembly</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>965</category_id>
+    <category_name>Unikitty!</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>966</category_id>
+    <category_name>Arch, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>971</category_id>
+    <category_name>The LEGO Movie 2</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>974</category_id>
+    <category_name>Cone, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>975</category_id>
+    <category_name>Overwatch</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>976</category_id>
+    <category_name>LEGO Brand</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>978</category_id>
+    <category_name>Ball</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>983</category_id>
+    <category_name>Promotional</category_name>
+    <parent_id>976</parent_id>
+  </row>
+  <row>
+    <category_id>988</category_id>
+    <category_name>Building Event</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>989</category_id>
+    <category_name>Ring</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>990</category_id>
+    <category_name>Accessory, Human Tool</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>991</category_id>
+    <category_name>Chain</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>992</category_id>
+    <category_name>Projectile Launcher</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>993</category_id>
+    <category_name>Spring</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>994</category_id>
+    <category_name>Energy Effect</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>995</category_id>
+    <category_name>Party Supplies</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>996</category_id>
+    <category_name>Card, Greeting Card</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>997</category_id>
+    <category_name>Card</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>998</category_id>
+    <category_name>Playmat</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>999</category_id>
+    <category_name>Slide</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1003</category_id>
+    <category_name>Paper, Forms &amp; Surveys</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1004</category_id>
+    <category_name>Guide Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1005</category_id>
+    <category_name>Smoking Supplies</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1006</category_id>
+    <category_name>Envelope &amp; Letter</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1007</category_id>
+    <category_name>Accessory Pack</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1008</category_id>
+    <category_name>Decoration</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1012</category_id>
+    <category_name>Aircraft, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1017</category_id>
+    <category_name>Sticker, Collectible Sticker</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1018</category_id>
+    <category_name>Paper, Certificate</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1021</category_id>
+    <category_name>Magazine, City</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1022</category_id>
+    <category_name>Magazine, Friends</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1023</category_id>
+    <category_name>Magazine, Nexo Knights</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1024</category_id>
+    <category_name>Magazine, Ninjago</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1025</category_id>
+    <category_name>Magazine, Star Wars</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1026</category_id>
+    <category_name>Magazine, Legends of Chima</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1027</category_id>
+    <category_name>Wheel, Accessory</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1028</category_id>
+    <category_name>2019</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1030</category_id>
+    <category_name>Trading Card Album</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1037</category_id>
+    <category_name>Duplo, Plant</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1038</category_id>
+    <category_name>Duplo, Food</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1039</category_id>
+    <category_name>Tile, Promotional</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1040</category_id>
+    <category_name>Mix</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1041</category_id>
+    <category_name>FORMA</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1042</category_id>
+    <category_name>Hidden Side</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1043</category_id>
+    <category_name>Stranger Things</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1044</category_id>
+    <category_name>xtra</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1048</category_id>
+    <category_name>Road Sign, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1059</category_id>
+    <category_name>Clikits, Icon Accent</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1060</category_id>
+    <category_name>Cardboard Sleeve</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1063</category_id>
+    <category_name>Magazine, Super Heroes</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1064</category_id>
+    <category_name>Toy, Wooden</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1065</category_id>
+    <category_name>LEGO Originals</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1066</category_id>
+    <category_name>2020</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1069</category_id>
+    <category_name>Trolls World Tour</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1070</category_id>
+    <category_name>Minions The Rise Of Gru</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1076</category_id>
+    <category_name>Dots</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1078</category_id>
+    <category_name>Felt</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1082</category_id>
+    <category_name>Micro Doll, Body Part</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1083</category_id>
+    <category_name>Magazine, Hidden Side</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1084</category_id>
+    <category_name>Magazine, Jurassic World</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1085</category_id>
+    <category_name>Magazine, Elves</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1086</category_id>
+    <category_name>Magazine, Bionicle</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1087</category_id>
+    <category_name>Magazine, Disney Princess</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1088</category_id>
+    <category_name>Magazine, The LEGO Movie 2</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1090</category_id>
+    <category_name>Plate, Round, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1092</category_id>
+    <category_name>Storage, Sorting Tray</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1093</category_id>
+    <category_name>Wedge, Plate, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1095</category_id>
+    <category_name>Super Mario</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1097</category_id>
+    <category_name>Minifigure, Torso Assembly, Decor.</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1098</category_id>
+    <category_name>Minifigure, Legs, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1100</category_id>
+    <category_name>Monkie Kid</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1102</category_id>
+    <category_name>Sticker Book</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1103</category_id>
+    <category_name>Brick Sketches</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1104</category_id>
+    <category_name>Paper, Flyer</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1108</category_id>
+    <category_name>Explorer</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1109</category_id>
+    <category_name>Magazine, Explorer</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1110</category_id>
+    <category_name>Miscellaneous Licensed</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1111</category_id>
+    <category_name>Clothing Accessories</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1112</category_id>
+    <category_name>Luggage &amp; Luggage Accessories</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1113</category_id>
+    <category_name>Office Supplies</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1116</category_id>
+    <category_name>Minifigure, Legs,Modified Brick</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1118</category_id>
+    <category_name>Minifigure, Legs, Modified, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1119</category_id>
+    <category_name>2021</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1121</category_id>
+    <category_name>Duplo, Building</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1122</category_id>
+    <category_name>Botanical Collection</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1125</category_id>
+    <category_name>Vidiyo</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1128</category_id>
+    <category_name>Animal, Body Part, Decorated</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1145</category_id>
+    <category_name>Stamp</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1146</category_id>
+    <category_name>Clothing, Children&amp;#39;s</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1147</category_id>
+    <category_name>Coin</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1154</category_id>
+    <category_name>Friends TV Series</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1163</category_id>
+    <category_name>Queer Eye</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1165</category_id>
+    <category_name>Magazine, Minecraft</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1166</category_id>
+    <category_name>Games</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1167</category_id>
+    <category_name>Magazine, LEGO Club</category_name>
+    <parent_id>0</parent_id>
+  </row>
+  <row>
+    <category_id>1196</category_id>
+    <category_name>BrickLink</category_name>
+    <parent_id>0</parent_id>
+  </row>
+</root>
