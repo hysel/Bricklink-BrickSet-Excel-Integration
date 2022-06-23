@@ -1,6 +1,6 @@
 ﻿// ***************************************************************************************
 // * BrickLink Excel function integration 
-// * Version 1.0 3/10/2021
+// * Version 1.1 6/23/2022
 // * Itamar Budin lego.c.israel@gmail.com
 // * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
