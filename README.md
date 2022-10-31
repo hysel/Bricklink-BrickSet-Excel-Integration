@@ -1,4 +1,41 @@
 # Bricklink-Excel-Integration
-The purpose of this project is allow you to use excel functions to retrive LEGO items (sets, minifigures and other items) infromation to an excel spreadsheet.
-At this momment, this code will allow you to get an item name, release year and avarage price for a new item directly from BrickLink API
-This projec was in the works for a the last 6 months and as I am not a developer, only a person who can write some code, I am inviting you to add more functionlity to this solution.
+This project aims to allow you to use excel functions to retrieve LEGO sets, including Minifigures and other items, information to an excel spreadsheet.
+At this moment, this code will allow you to get an item name, release year, and average price for a new item directly from BrickLink API.
+This project has been in the works for the last two years, and as I am not a developer, only a person who can write some code, I am inviting you to add more functionality to this solution.
+
+Usage:
+
+1) Obtain the four secret keys you need to connect to BrickLink API. (For more details, see: https://www.bricklink.com/v2/api/welcome.page)
+
+2) If you are running Windows 10 and above, you will need to add a special registry key to your OS to allow support TLS 1.2 (https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c) 
+
+3) Open the solution in Visual Studio and update the following attributes:
+        const string consumerKey = "";        // The Consumer key
+        const string consumerSecret = "";     // The Consumer Secret
+        const string tokenValue = "";         // The Token Value
+        const string tokenSecret = "";        // The Token Secret               
+        const string DataSource = "";         // The DB server name
+        const string InitialCatalog = "";     // The Database NAME
+        const string DBUser = "";             // The DB username
+        const string DBPassword = "";         // The DB password
+
+4) Compile the code.
+
+5) Go to the solution folder (for example C:\Users\<user name>\source\repos\Bricklink-Excel-Integration\bin\Debug) and run the BrickLink-AddIn64.xll file.
+
+6) Enable all Macros support in MS Excel.
+
+7) Create a new sheet and enter the set number in any field.
+
+8) Go to another field, and you will be able to call the following functions:
+
+    - GetSetName(<set Number>) - Get the LEGO set Name
+    - GetSetThumbnail(<set Number>)- Get the LEGO set Thumbnail URL
+    - GetSetImage(<set Number>)- Get the LEGO set Image URL
+    - GetSetYear(<set Number>)- Get the LEGO set release date
+    - GetSetPrice(<set Number>)- Get the LEGO set average price (Yes, I know this is not a good idea as the information is skewed due to someone putting ridiculous prices on a set. I will fix it 
+                                 in a later date)
+    - GetSetCategory(<set Number>) - Get the LEGO set category. This is based on an XML file that is part of the solution that translates BrickLink category ID (found on the set JSON payload)
+                                     to the human-friendly Name.
+
+
