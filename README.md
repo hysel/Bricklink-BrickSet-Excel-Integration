@@ -10,14 +10,23 @@ Usage:
 2) If you are running Windows 10 and above, you will need to add a special registry key to your OS to allow support TLS 1.2 (https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c) 
 
 3) Open the solution in Visual Studio and update the following attributes:
+        
         const string consumerKey = "";        // The Consumer key
+        
         const string consumerSecret = "";     // The Consumer Secret
+        
         const string tokenValue = "";         // The Token Value
+        
         const string tokenSecret = "";        // The Token Secret               
+        
         const string DataSource = "";         // The DB server name
+        
         const string InitialCatalog = "";     // The Database NAME
+        
         const string DBUser = "";             // The DB username
+        
         const string DBPassword = "";         // The DB password
+        
 
 4) Compile the code.
 
