@@ -37,7 +37,7 @@ namespace BrickLink
 
         const string consumerKey = "";        // The Consumer key
         const string consumerSecret = "";     // The Consumer Secret
-        const string tokenValue = "";         // The Tken Value
+        const string tokenValue = "";         // The Token Value
         const string tokenSecret = "";        // The Token Secret
         const string brickLinkURL = "https://api.bricklink.com/api/store/v2/items/set/"; // BrickLink API URL
         public static string tokenx = "";
