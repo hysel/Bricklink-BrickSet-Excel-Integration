@@ -46,7 +46,7 @@ namespace BrickLink
         const string DataSource = "";       // The DB server name
         const string InitialCatalog = "";   // The Database NAME
         const string DBUser = "";           // The DB username
-        const string DBPassword = "!";       // The DB password
+        const string DBPassword = "";       // The DB password
 
 
         private static string Escape(string s)
