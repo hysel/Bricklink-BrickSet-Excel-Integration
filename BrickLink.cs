@@ -1,6 +1,6 @@
 ﻿// ***************************************************************************************
 // * BrickLink Excel function integration 
-// * Version 2.0 10/31/2022
+// * Version 2.01 11/2/2022
 // * Itamar Budin brickmindz@gmail.com
 // * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
@@ -8,6 +8,7 @@
 // This is version of the tool which includes
 //  * A new DB based cache solution
 //  * Update to support BrickLink v2 API that was published in 10/31/2022
+//  * Update the URL handling to support gear
 //  * Variables normalization
 // Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
 
@@ -27,6 +28,7 @@ using System.Threading;
 using System.Xml;
 using System.Data.SqlClient;
 using System.Web;
+using System.Linq;
 
 namespace BrickLink
 {
@@ -39,7 +41,8 @@ namespace BrickLink
         const string consumerSecret = "";     // The Consumer Secret
         const string tokenValue = "";         // The Token Value
         const string tokenSecret = "";        // The Token Secret
-        const string brickLinkURL = "https://api.bricklink.com/api/store/v2/items/set/";  // BrickLink API URL
+        const string brickLinkSetURL = "https://api.bricklink.com/api/store/v2/items/set/";  // BrickLink API Set URL
+        const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";  // BrickLink API Gear URL
         public static string tokenx = "";
 
         // Added a new section to implmenet DB based cache
@@ -177,11 +180,10 @@ namespace BrickLink
                 string setName = "";
                 if (db_check_cache == "SetIsInCache")
                 {
-
                     string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                     SqlConnection setNameConnection = new SqlConnection(connectionString);
                     setNameConnection.Open();
-                    String sql = "SELECT NAME FROM [dbo].Sets where ID=" + setID;
+                    String sql = "SELECT NAME FROM [dbo].Sets where ID='" + setID + "'";
                     SqlCommand command = new SqlCommand(sql, setNameConnection);
                     SqlDataReader setNameReader = command.ExecuteReader();
                     if (setNameReader.HasRows)
@@ -189,33 +191,57 @@ namespace BrickLink
                         while (setNameReader.Read())
                         {
                             setName = Convert.ToString(setNameReader["name"]);
-                        }
-                        setNameReader.Close();
-                        setNameConnection.Close();
-                        return setName;
+                        }                       
                     }
-                    else
+                    setNameReader.Close();
+                    setNameConnection.Close();
+                    return setName;
+                }
+                else
+                {
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                    var setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                        var obj = JObject.Parse(setInformation);
-                        if (!obj.ToString().Contains("TIMESTAMP"))
+                        if ((int)setObj["data"].Count() != 0)
                         {
-                            setName = (string)obj["data"]["name"];
+                            setName = (string)setObj["data"]["name"];
                             if (setName == null)
                             {
-                                setName = "no results";
+                                return "no results";
                             }
+                            return setName;
                         }
                         else
                         {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetName(setID);
-                        }
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                            var gearObj = JObject.Parse(setInformation);
+                            if (!gearObj.ToString().Contains("TIMESTAMP"))
+                            {
+                                setName = (string)gearObj["data"]["name"];
+                                if (setName == null)
+                                {
+                                    return "no results";
+                                }
+                                return setName;
+                            }
+                            else
+                            {
+                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                Thread.Sleep(500);
+                                return GetSetName(setID);
+                            }
+                        } 
+                    }
+                    else
+                    {
+                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                        Thread.Sleep(500);
+                        return GetSetName(setID);
                     }
                 }                
-                return setName;                         
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return ex.Message.ToString();
             }
@@ -233,7 +259,7 @@ namespace BrickLink
                     string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                     SqlConnection setThumbNailConnection = new SqlConnection(connectionString);
                     setThumbNailConnection.Open();
-                    String sql = "SELECT thumbnail_url FROM [dbo].Sets where ID=" + setID;
+                    String sql = "SELECT thumbnail_url FROM [dbo].Sets where ID='" + setID + "'";
                     SqlCommand command = new SqlCommand(sql, setThumbNailConnection);
                     SqlDataReader setThumbNailreader = command.ExecuteReader();
                     if (setThumbNailreader.HasRows)
@@ -248,26 +274,43 @@ namespace BrickLink
                     }
                     else
                     {
-
-                        string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                        var obj = JObject.Parse(setInformation);
-                        if (!obj.ToString().Contains("TIMESTAMP"))
+                        string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                        var setObj = JObject.Parse(setInformation);
+                        if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            setThumbnail = (string)obj["data"]["thumbnail_url"];
-                            if (setThumbnail == null)
+                            if ((int)setObj["data"].Count() != 0)
                             {
-                                setThumbnail = "no results";
+                                setThumbnail = (string)setObj["data"]["thumbnail_url"];
+                                if (setThumbnail == null)
+                                {
+                                    return "no results";
+                                }
+                                return setThumbnail;
                             }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetThumbnail(setID);
+                            else
+                            {
+                                setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                                var gearObj = JObject.Parse(setInformation);
+                                if (!gearObj.ToString().Contains("TIMESTAMP"))
+                                {
+                                    setThumbnail = (string)gearObj["data"]["thumbnail_url"];
+                                    if (setThumbnail == null)
+                                    {
+                                        return "no results";
+                                    }
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return GetSetThumbnail(setID);
+                                }
+                            }
+                            return setThumbnail;
                         }
                     }
                 }
-                return setThumbnail;            
+                return setThumbnail;
             }
             catch (Exception ex)
             {
@@ -287,7 +330,7 @@ namespace BrickLink
                     string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                     SqlConnection setImageConnection = new SqlConnection(connectionString);
                     setImageConnection.Open();
-                    String sql = "SELECT imageURL FROM [dbo].Sets where ID=" + setID;
+                    String sql = "SELECT imageURL FROM [dbo].Sets where ID='" + setID + "'";
                     SqlCommand command = new SqlCommand(sql, setImageConnection);
                     SqlDataReader setImageReader = command.ExecuteReader();
                     if (setImageReader.HasRows)
@@ -303,24 +346,42 @@ namespace BrickLink
                     }
                     else
                     {
-                        string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                        var obj = JObject.Parse(setInformation);
-                        if (!obj.ToString().Contains("TIMESTAMP"))
+                        string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                        var setObj = JObject.Parse(setInformation);
+                        if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            setImage = (string)obj["data"]["image_url"];
-                            if (setImage == null)
+                            if ((int)setObj["data"].Count() != 0)
                             {
-                                setImage = "no results";
+                                setImage = (string)setObj["data"]["image_url"];
+                                if (setImage == null)
+                                {
+                                    return "no results";
+                                }
+                                return setImage;
                             }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetImage(setID);
+                            else
+                            {
+                                setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                                var gearObj = JObject.Parse(setInformation);
+                                if (!gearObj.ToString().Contains("TIMESTAMP"))
+                                {
+                                    setImage = (string)gearObj["data"]["image_url"];
+                                    if (setImage == null)
+                                    {
+                                        return "no results";
+                                    }
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return GetSetImage(setID);
+                                }
+                            }
+                            return setImage;
                         }
                     }
-                }                
+                }
                 return setImage;
             }
             catch (Exception ex)
@@ -342,7 +403,7 @@ namespace BrickLink
                     string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                     SqlConnection setYearConnection = new SqlConnection(connectionString);
                     setYearConnection.Open();
-                    String sql = "SELECT year_released FROM [dbo].Sets where ID=" + setID;
+                    String sql = "SELECT year_released FROM [dbo].Sets where ID='" + setID + "'";
                     SqlCommand command = new SqlCommand(sql, setYearConnection);
                     SqlDataReader setYearReader = command.ExecuteReader();
                     if (setYearReader.HasRows)
@@ -357,14 +418,38 @@ namespace BrickLink
                     }
                     else
                     {
-                        string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                        var obj = JObject.Parse(setInformation);
-                        if (!obj.ToString().Contains("TIMESTAMP"))
+                        string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                        var setObj = JObject.Parse(setInformation);
+                        if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            setYear = (string)obj["data"]["year_released"];
-                            if (setYear == null)
+                            if ((int)setObj["data"].Count() != 0)
                             {
-                                setYear = "no results";
+                                setYear = (string)setObj["data"]["year_released"];
+                                if (setYear == null)
+                                {
+                                    return "no results";
+                                }
+                                return setYear;
+                            }
+                            else
+                            {
+                                setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                                var gearObj = JObject.Parse(setInformation);
+                                if (!gearObj.ToString().Contains("TIMESTAMP"))
+                                {
+                                    setYear = (string)gearObj["data"]["year_released"];
+                                    if (setYear == null)
+                                    {
+                                        return "no results";
+                                    }
+                                    return setYear;
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return GetSetYear(setID);
+                                }
                             }
                         }
                         else
@@ -373,7 +458,7 @@ namespace BrickLink
                             Thread.Sleep(500);
                             return GetSetYear(setID);
                         }
-                    }                   
+                    }
                 }
                 return setYear;
             }
@@ -392,7 +477,7 @@ namespace BrickLink
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                 SqlConnection setPriceConnection = new SqlConnection(connectionString);
                 setPriceConnection.Open();
-                String sql = "SELECT [avg_price] FROM [dbo].Sets where ID=" + setID;
+                String sql = "SELECT [avg_price] FROM [dbo].Sets where ID='" + setID + "'";
                 SqlCommand command = new SqlCommand(sql, setPriceConnection);
                 SqlDataReader setPriceReader = command.ExecuteReader();
                 if (setPriceReader.HasRows)
@@ -407,14 +492,37 @@ namespace BrickLink
                 }
                 else
                 {
-                    string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "price");
-                    var obj = JObject.Parse(setInformation);
-                    if (!obj.ToString().Contains("TIMESTAMP"))
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "price");
+                    var setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        setPrice = (string)obj["data"]["avg_price"];
-                        if (setPrice == null)
+                        if ((string)setObj["meta"]["code"] != "404")
                         {
-                            setPrice = "no results";
+                            setPrice = (string)setObj["data"]["avg_price"];
+                            if (setPrice == null)
+                            {
+                                return "no results";
+                            }
+                            return setPrice;
+                        }
+                        else
+                        {
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "price");
+                            var gearObj = JObject.Parse(setInformation);
+                            if (!gearObj.ToString().Contains("TIMESTAMP"))
+                            {
+                                setPrice = (string)gearObj["data"]["avg_price"];
+                                if (setPrice == null)
+                                {
+                                    return "no results";
+                                }
+                            }
+                            else
+                            {
+                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                Thread.Sleep(500);
+                                return GetSetImage(setID);
+                            }
                         }
                     }
                     else
@@ -423,14 +531,14 @@ namespace BrickLink
                         Thread.Sleep(500);
                         return GetSetPrice(setID);
                     }
+                    return setPrice;
                 }
-                return setPrice;
             }
             catch (Exception ex)
             {
                 return ex.Message.ToString();
             }
-        }        
+        }
 
         //This function will return the item category ID. 
         //It will compare it to the bricklinkcategorylist.xml file (which is a dump of the /categories API call from bricklink) and return the category name
@@ -442,7 +550,7 @@ namespace BrickLink
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                 SqlConnection setCategoryConnection = new SqlConnection(connectionString);
                 setCategoryConnection.Open();
-                String sql = "SELECT [categoryID] FROM [dbo].Sets where ID=" + setID;
+                String sql = "SELECT [categoryID] FROM [dbo].Sets where ID='" + setID + "'";
                 SqlCommand command = new SqlCommand(sql, setCategoryConnection);
                 SqlDataReader setCategoryReader = command.ExecuteReader();
                 if (setCategoryReader.HasRows)
@@ -457,11 +565,37 @@ namespace BrickLink
                 }
                 else
                 {
-                    string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                    var obj = JObject.Parse(setInformation);
-                    if (!obj.ToString().Contains("TIMESTAMP"))
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                    var setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        setCategory = (string)obj["data"]["category_id"];
+                        if ((int)setObj["data"].Count() != 0)
+                        {
+                            setCategory = (string)setObj["data"]["category_id"];
+                            if (setCategory == null)
+                            {
+                                return "no results";
+                            }                            
+                        }
+                        else
+                        {
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                            var gearObj = JObject.Parse(setInformation);
+                            if (!gearObj.ToString().Contains("TIMESTAMP"))
+                            {
+                                setCategory = (string)gearObj["data"]["category_id"];
+                                if (setCategory == null)
+                                {
+                                    return "no results";
+                                }
+                            }
+                            else
+                            {
+                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                Thread.Sleep(500);
+                                return GetSetCategory(setID);
+                            }
+                        }
                     }
                     else
                     {
@@ -469,44 +603,44 @@ namespace BrickLink
                         Thread.Sleep(500);
                         return GetSetCategory(setID);
                     }
-                }
-            
-                if (setCategory != null)
-                {
-                    XmlReader xmlFile;
-                    System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-                    xmlFile = XmlReader.Create(a.GetManifestResourceStream("BrickLink.bricklinkcategorylist.xml"), new XmlReaderSettings());
-                    DataSet ds = new DataSet();
-                    DataView dv;
-                    ds.ReadXml(xmlFile);
 
-                    dv = new DataView(ds.Tables[0])
+                    if (setCategory != null)
                     {
-                        Sort = "category_id"
-                    };
+                        XmlReader xmlFile;
+                        System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
+                        xmlFile = XmlReader.Create(a.GetManifestResourceStream("BrickLink.bricklinkcategorylist.xml"), new XmlReaderSettings());
+                        DataSet ds = new DataSet();
+                        DataView dv;
+                        ds.ReadXml(xmlFile);
 
-                    int index = dv.Find(setCategory);
+                        dv = new DataView(ds.Tables[0])
+                        {
+                            Sort = "category_id"
+                        };
 
-                    if (index == -1)
-                    {
-                        setCategory = "no results";
+                        int index = dv.Find(setCategory);
+
+                        if (index == -1)
+                        {
+                            setCategory = "no results";
+                        }
+                        else
+                        {
+                            setCategory = dv[index]["category_name"].ToString();
+                        }
                     }
                     else
                     {
-                        setCategory = dv[index]["category_name"].ToString();
+                        return "no results";
                     }
-                }
-                else
-                {
-                    return "no results";
+                    return setCategory;
                 }                
-                return setCategory;
             }
             catch (Exception ex)
             {
                 return ex.Message.ToString();
             }
-        }    
+        }
 
         private static string Check_cache(string setID)
         // The goal for this new funtion is to streamline the cache usage of the solution. 
@@ -518,70 +652,106 @@ namespace BrickLink
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                 SqlConnection setCacheConnection = new SqlConnection(connectionString);
                 setCacheConnection.Open();
-                String sql = "SELECT * FROM [dbo].Sets where ID=" + setID;
+                String sql = "SELECT * FROM [dbo].Sets where ID='" + setID + "'";
                 SqlCommand command = new SqlCommand(sql, setCacheConnection);
                 SqlDataReader cacheReader = command.ExecuteReader();
 
                 DateTime today = DateTime.Now;
                 today.ToString("yyyy-MM-dd");
-                string SetURL = brickLinkURL + setID + "-1";
+                string SetURL = brickLinkSetURL + setID + "-1";
+                string setName = "";
+                string setType = "";
+                string setImageURL = "";
+                string setThumbnailURL = "";
+                string setYear_released = "";
 
                 if (!(cacheReader.HasRows))
                 {
-                    string setNameJSON = GetSetInformation(SetURL, "info");
-                    var obj = JObject.Parse(setNameJSON);
-                    if (!obj.ToString().Contains("TIMESTAMP"))
+                    string setNameJSON = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                    var setObj = JObject.Parse(setNameJSON);;
+                    if ((int)setObj["data"].Count() != 0)
                     {
-                        string setName = (string)obj["data"]["name"];
-                        if (!(setName == null))
+                        if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
                             // get set information
-                            string setType = (string)obj["data"]["type"] != null ? (string)obj["data"]["type"] : "N/A";
-                            string setImageURL = (string)obj["data"]["image_url"] != null ? "https:" + (string)obj["data"]["image_url"] : "N/A";
-                            string setThumbnailURL = (string)obj["data"]["thumbnail_url"] != null ? "https:" + (string)obj["data"]["thumbnail_url"] : "N/A";
-                            string setYear_released = (string)obj["data"]["year_released"] != null ? (string)obj["data"]["year_released"] : "N/A";
-
-                            // Get set price
-                            string setPrice = GetSetPrice(setID);
-
-                            // get set category
-                            string category_id = GetSetCategory(setID);
-
-                            string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated)";
-                            SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
-                            insertCommand.Parameters.AddWithValue("@ID", setID);
-                            insertCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
-                            insertCommand.Parameters.AddWithValue("@type", setType);
-                            insertCommand.Parameters.AddWithValue("@categoryID", HttpUtility.HtmlDecode(category_id));
-                            insertCommand.Parameters.AddWithValue("@imageURL", setImageURL);
-                            insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                            insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                            insertCommand.Parameters.AddWithValue("@avg_price", setPrice);
-                            insertCommand.Parameters.AddWithValue("@date_updated", today);
-                            string debugSQL = insertCommand.ToString();
-                            int result = insertCommand.ExecuteNonQuery();
-
-                            // check for errors
-                            if (result < 0)
-                            {
-                                return "There was an error inserting the values to the DB";                                
-                            }
-                            else
-                            {
-                                return "SetIsInCache";                                
-                            }
+                            setName = (string)setObj["data"]["name"] ?? "N/A";
+                            setType = (string)setObj["data"]["type"] ?? "N/A";
+                            setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
+                            setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
+                            setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
                         }
                         else
                         {
-                            return "No results were found";
-                        }                        
+                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                            Thread.Sleep(500);
+                            return Check_cache(setID);
+                        }
+
                     }
                     else
                     {
-                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                        Thread.Sleep(500);
-                        return Check_cache(setID);
-                    }                   
+                        string gearNameJSON = GetSetInformation(brickLinkGearURL + setID, "info");
+                        var gearObj = JObject.Parse(gearNameJSON);
+                        if (!gearObj.ToString().Contains("TIMESTAMP"))
+                        {
+                            // get set information
+                            setName = (string)gearObj["data"]["name"] ?? "N/A";
+                            setType = (string)gearObj["data"]["type"] ?? "N/A";
+                            setImageURL = "https:" + (string)gearObj["data"]["image_url"] ?? "N/A";
+                            setThumbnailURL = "https:" + (string)gearObj["data"]["thumbnail_url"] ?? "N/A";
+                            setYear_released = (string)gearObj["data"]["year_released"] ?? "N/A";
+                        }
+                        else
+                        {
+                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                            Thread.Sleep(500);
+                            return Check_cache(setID);
+                        }
+                    }
+
+
+                    // Get set price
+                    string setPrice = GetSetPrice(setID);
+
+                    // get set category
+                    string category_id = GetSetCategory(setID);
+
+                    if (setName != "N/A")
+                    {
+                        string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated)";
+                        SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
+                        insertCommand.Parameters.AddWithValue("@ID", setID);
+                        insertCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
+                        insertCommand.Parameters.AddWithValue("@type", setType);
+                        insertCommand.Parameters.AddWithValue("@categoryID", HttpUtility.HtmlDecode(category_id));
+                        insertCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                        insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
+                        insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
+                        insertCommand.Parameters.AddWithValue("@avg_price", setPrice);
+                        insertCommand.Parameters.AddWithValue("@date_updated", today);
+                        string debugSQL = insertCommand.ToString();
+                        int result = insertCommand.ExecuteNonQuery();
+
+                        // check for errors
+                        if (result < 0)
+                        {
+                            cacheReader.Close();
+                            setCacheConnection.Close();
+                            return "There was an error inserting the values to the DB";
+                        }
+                        else
+                        {
+                            cacheReader.Close();
+                            setCacheConnection.Close();
+                            return "SetIsInCache";
+                        }
+                    }
+                    else
+                    {
+                        cacheReader.Close();
+                        setCacheConnection.Close();
+                        return "No results where found";
+                    }
                 }
                 else
                 {
@@ -594,69 +764,89 @@ namespace BrickLink
                         // Check if 30 days has past since the last update and automatic update the cache records
                         if (diffOfDays.TotalDays > 30)
                         {
-                            string setInformation = GetSetInformation(brickLinkURL + setID + "-1", "info");
-                            var obj = JObject.Parse(setInformation);
-                            if (!obj.ToString().Contains("TIMESTAMP"))
+                            string setNameJSON = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                            var setObj = JObject.Parse(setNameJSON);
+                            if ((int)setObj["data"].Count() != 0)
                             {
-                                
-                                string setName = (string)obj["data"]["name"];
-                                
-                                if (!(setName == null))
+                                if (!setObj.ToString().Contains("TIMESTAMP"))
                                 {
                                     // get set information
-                                    string setType = (string)obj["data"]["type"] != null ? (string)obj["data"]["type"] : "N/A";
-                                    string setImageURL = (string)obj["data"]["image_url"] != null ? "https:" + (string)obj["data"]["image_url"] : "N/A";
-                                    string setThumbnailURL = (string)obj["data"]["thumbnail_url"] != null ? "https:" + (string)obj["data"]["thumbnail_url"] : "N/A";
-                                    string setYear_released = (string)obj["data"]["year_released"] != null ? (string)obj["data"]["year_released"] : "N/A";
-
-                                    // Get set price
-                                    string setPrice = GetSetPrice(setID);
-
-                                    // get set category
-                                    string category_id = GetSetCategory(setID);
-
-                                    string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated where ID=@ID";
-                                    SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
-                                    updateCommand.Parameters.AddWithValue("@ID", setID);
-                                    updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
-                                    updateCommand.Parameters.AddWithValue("@type", setType);
-                                    updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(category_id));
-                                    updateCommand.Parameters.AddWithValue("@imageURL", setImageURL);
-                                    updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                                    updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                                    updateCommand.Parameters.AddWithValue("@avg_price", setPrice);
-                                    updateCommand.Parameters.AddWithValue("@date_updated", today);
-                                    int result = updateCommand.ExecuteNonQuery();
-
-                                    // check for errors
-                                    if (result < 0)
-                                    {
-                                        return "There was an error updating the values to the DB";
-                                    }
-                                    return "SetIsInCache";
+                                    setName = (string)setObj["data"]["name"] ?? "N/A";
+                                    setType = (string)setObj["data"]["type"] ?? "N/A";
+                                    setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
+                                    setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
+                                    setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return Check_cache(setID);
                                 }
                             }
                             else
                             {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return Check_cache(setID);
+                                setNameJSON = GetSetInformation(brickLinkGearURL + setID, "info");
+                                var gearObj = JObject.Parse(setNameJSON);
+                                if (!gearObj.ToString().Contains("TIMESTAMP"))
+                                {
+                                    // get set information
+                                    setName = (string)gearObj["data"]["name"] ?? "N/A";
+                                    setType = (string)gearObj["data"]["type"] ?? "N/A";
+                                    setImageURL = "https:" + (string)gearObj["data"]["image_url"] ?? "N/A";
+                                    setThumbnailURL = "https:" + (string)gearObj["data"]["thumbnail_url"] ?? "N/A";
+                                    setYear_released = (string)gearObj["data"]["year_released"] ?? "N/A";
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return Check_cache(setID);
+                                }
                             }
-                        }
-                        else
-                        {
-                            return "SetIsInCache";                            
-                        }
+
+
+                            // Get set price
+                            string setPrice = GetSetPrice(setID);
+
+                            // get set category
+                            string category_id = GetSetCategory(setID);
+
+                            if (setName != "N/A")
+                            {
+                                string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated where ID=@ID";
+                                SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
+                                updateCommand.Parameters.AddWithValue("@ID", setID);
+                                updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
+                                updateCommand.Parameters.AddWithValue("@type", setType);
+                                updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(category_id));
+                                updateCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                                updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
+                                updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
+                                updateCommand.Parameters.AddWithValue("@avg_price", setPrice);
+                                updateCommand.Parameters.AddWithValue("@date_updated", today);
+                                int result = updateCommand.ExecuteNonQuery();
+
+                                // check for errors
+                                if (result < 0)
+                                {
+                                    return "There was an error updating the values to the DB";
+                                }                                
+                                return "SetIsInCache";
+                            }
+                        }                                                
                     }
+                    cacheReader.Close();
                     setCacheConnection.Close();
                     return "SetIsInCache";
-                }                
-            }
+                }
+            }        
             catch (Exception ex)
             {
                 return ex.Message.ToString();
             }
         }
+
         public static void Main()
         { }
     }
