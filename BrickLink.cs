@@ -1,17 +1,14 @@
 ﻿// ***************************************************************************************
 // * BrickLink Excel function integration 
-// * Version 2.02 11/3/2022
+// * Version 3.0 05-21-2023
 // * Itamar Budin brickmindz@gmail.com
 // * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
 // This solution is using the Excel-DNA plug-in. For more details, see the ExcelDna.AddIn.md file
 // This is version of the tool which includes
-//  * A new DB based cache solution
-//  * Update to support BrickLink v2 API that was published in 10/31/2022
-//  * Update the URL handling to support gear, minifig and parts
-//  * Variables normalization
+//  * Code optimization for the DB cache
+//  * Better handling of URLs
 // Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
-
 // I am not a developer but know how to write basic code so please excuse any bad code writing :)
 
 
@@ -29,6 +26,7 @@ using System.Xml;
 using System.Data.SqlClient;
 using System.Web;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace BrickLink
 {
@@ -45,6 +43,7 @@ namespace BrickLink
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";  // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";  // BrickLink API Minifig URL
         const string brickLinkPartURL = "https://api.bricklink.com/api/store/v2/items/part/";  // BrickLink API Part URL
+        const string brickLinkBooksURL = "https://api.bricklink.com/api/store/v2/items/book/";  // BrickLink API Book URL
         public static string tokenx = "";
 
         // Added a new section to implmenet DB based cache
@@ -140,66 +139,72 @@ namespace BrickLink
         */
         private static string GetSetInformation(string url, string requestType)
         {
-            // This section will determine if the original request was made using the GetSetPrice function and will change the base URL to retrieve the pricing information 
-            if (requestType != "info")
+            try
             {
-                url += "/price";
+                // This section will determine if the original request was made using the GetSetPrice function and will change the base URL to retrieve the pricing information 
+                if (requestType != "info")
+                {
+                    url += "/price";
+                }
+
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+                httpWebRequest.Method = "GET";
+                // Add TLS 1.2 support            
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                ServicePointManager.DefaultConnectionLimit = 9999;
+
+
+                string timeStamp = ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString();
+                string nonce = GenerateNonce("");
+
+
+                string signatureBaseString = Escape(httpWebRequest.Method.ToUpper()) + "&";
+                signatureBaseString += EscapeUriDataStringRfc3986(url) + "&";
+                signatureBaseString += EscapeUriDataStringRfc3986(
+                    "oauth_consumer_key=" + EscapeUriDataStringRfc3986(consumerKey) + "&" +
+                    "oauth_nonce=" + EscapeUriDataStringRfc3986(nonce) + "&" +
+                    "oauth_signature_method=" + EscapeUriDataStringRfc3986("HMAC-SHA1") + "&" +
+                    "oauth_timestamp=" + EscapeUriDataStringRfc3986(timeStamp) + "&" +
+                    "oauth_token=" + EscapeUriDataStringRfc3986(tokenValue) + "&" +
+                    "oauth_version=" + EscapeUriDataStringRfc3986("1.0"));
+                Console.WriteLine(@"signatureBaseString: " + signatureBaseString);
+
+                string key = EscapeUriDataStringRfc3986(consumerSecret) + "&" + EscapeUriDataStringRfc3986(tokenSecret);
+                Console.WriteLine(@"key: " + key);
+                var signatureEncoding = new ASCIIEncoding();
+                byte[] keyBytes = signatureEncoding.GetBytes(key);
+                byte[] signatureBaseBytes = signatureEncoding.GetBytes(signatureBaseString);
+                string signatureString;
+                using (var hmacsha1 = new HMACSHA1(keyBytes))
+                {
+                    byte[] hashBytes = hmacsha1.ComputeHash(signatureBaseBytes);
+                    signatureString = Convert.ToBase64String(hashBytes);
+                }
+                signatureString = EscapeUriDataStringRfc3986(signatureString);
+                Console.WriteLine(@"signatureString: " + signatureString);
+
+                string SimpleQuote(string s) => '"' + s + '"';
+
+                string header = "OAuth oauth_consumer_key=" + SimpleQuote(consumerKey) + ",oauth_token=" + SimpleQuote(tokenValue) + ",oauth_signature_method=" + SimpleQuote("HMAC-SHA1") + ",oauth_timestamp=" + SimpleQuote(timeStamp) + ",oauth_nonce=" + SimpleQuote(nonce) + ",oauth_version=" + SimpleQuote("1.0") + ",oauth_signature=" + SimpleQuote(signatureString);
+
+                Console.WriteLine(@"header: " + header);
+                httpWebRequest.Headers.Add(HttpRequestHeader.Authorization, header);
+                var response = (HttpWebResponse)httpWebRequest.GetResponse();
+                string characterSet = ((HttpWebResponse)response).CharacterSet;
+                var responseEncoding = characterSet == ""
+                    ? Encoding.UTF8
+                    : Encoding.GetEncoding(characterSet ?? "utf-8");
+                var responsestream = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                if (responsestream == null)
+                {
+                    throw new ArgumentNullException(nameof(characterSet));
+                }
+                return responsestream;
             }
-
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpWebRequest.Method = "GET";
-            // Add TLS 1.2 support            
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-            ServicePointManager.DefaultConnectionLimit = 9999;
-
-
-            string timeStamp = ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString();
-            string nonce = GenerateNonce("");
-
-
-            string signatureBaseString = Escape(httpWebRequest.Method.ToUpper()) + "&";
-            signatureBaseString += EscapeUriDataStringRfc3986(url) + "&";
-            signatureBaseString += EscapeUriDataStringRfc3986(
-                "oauth_consumer_key=" + EscapeUriDataStringRfc3986(consumerKey) + "&" +
-                "oauth_nonce=" + EscapeUriDataStringRfc3986(nonce) + "&" +
-                "oauth_signature_method=" + EscapeUriDataStringRfc3986("HMAC-SHA1") + "&" +
-                "oauth_timestamp=" + EscapeUriDataStringRfc3986(timeStamp) + "&" +
-                "oauth_token=" + EscapeUriDataStringRfc3986(tokenValue) + "&" +
-                "oauth_version=" + EscapeUriDataStringRfc3986("1.0"));
-            Console.WriteLine(@"signatureBaseString: " + signatureBaseString);
-
-            string key = EscapeUriDataStringRfc3986(consumerSecret) + "&" + EscapeUriDataStringRfc3986(tokenSecret);
-            Console.WriteLine(@"key: " + key);
-            var signatureEncoding = new ASCIIEncoding();
-            byte[] keyBytes = signatureEncoding.GetBytes(key);
-            byte[] signatureBaseBytes = signatureEncoding.GetBytes(signatureBaseString);
-            string signatureString;
-            using (var hmacsha1 = new HMACSHA1(keyBytes))
+            catch (Exception ex)
             {
-                byte[] hashBytes = hmacsha1.ComputeHash(signatureBaseBytes);
-                signatureString = Convert.ToBase64String(hashBytes);
+                return ex.Message.ToString();
             }
-            signatureString = EscapeUriDataStringRfc3986(signatureString);
-            Console.WriteLine(@"signatureString: " + signatureString);
-
-            string SimpleQuote(string s) => '"' + s + '"';
-
-            string header = "OAuth oauth_consumer_key=" + SimpleQuote(consumerKey) + ",oauth_token=" + SimpleQuote(tokenValue) + ",oauth_signature_method=" + SimpleQuote("HMAC-SHA1") + ",oauth_timestamp=" + SimpleQuote(timeStamp) + ",oauth_nonce=" + SimpleQuote(nonce) + ",oauth_version=" + SimpleQuote("1.0") + ",oauth_signature=" + SimpleQuote(signatureString);
-
-            Console.WriteLine(@"header: " + header);
-            httpWebRequest.Headers.Add(HttpRequestHeader.Authorization, header);
-            var response = (HttpWebResponse)httpWebRequest.GetResponse();
-            string characterSet = ((HttpWebResponse)response).CharacterSet;
-            var responseEncoding = characterSet == ""
-                ? Encoding.UTF8
-                : Encoding.GetEncoding(characterSet ?? "utf-8");
-            var responsestream = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            if (responsestream == null)
-            {
-                throw new ArgumentNullException(nameof(characterSet));
-            }
-            return responsestream;
-
         }
 
         //This function will return the item name
@@ -231,61 +236,40 @@ namespace BrickLink
                 else
                 {
                     string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    var setObj = JObject.Parse(setInformation);
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                    }
+
+                    JObject setObj = JObject.Parse(setInformation);
                     if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                        if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                        if (setObj.ContainsKey("data"))
                         {
-                            setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                            setObj = JObject.Parse(setInformation);
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                            setName = (string)setObj["data"]["name"];
+                            if (setName == null)
                             {
-                                setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                                return "no results";
                             }
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                            {
-                                setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                            }
-                        }
-
-                        setObj = JObject.Parse(setInformation);
-                        if (!setObj.ToString().Contains("TIMESTAMP"))
-                        {
-                            if (setObj.ContainsKey("data"))
-                            {
-                                setName = (string)setObj["data"]["name"];
-                                if (setName == null)
-                                {
-                                    return "no results";
-                                }
-                                return setName;
-                            }
-                            else
-                            {
-                                setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                                var gearObj = JObject.Parse(setInformation);
-                                if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                {
-                                    setName = (string)gearObj["data"]["name"];
-                                    if (setName == null)
-                                    {
-                                        return "no results";
-                                    }                                    
-                                }
-                                else
-                                {
-                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                    Thread.Sleep(500);
-                                    return GetSetName(setID);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetName(setID);
+                            return setName;
                         }
                     }
                     else
@@ -294,7 +278,7 @@ namespace BrickLink
                         Thread.Sleep(500);
                         return GetSetName(setID);
                     }
-                }
+                }            
                 return setName;
             }
             catch (Exception ex)
@@ -331,60 +315,40 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        var setObj = JObject.Parse(setInformation);
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                        }
+                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                        }
+                        // 5-21-2023 Added this section to deal with old booklets
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                        }
+
+                        JObject setObj = JObject.Parse(setInformation);
                         if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                            if (setObj.ContainsKey("data"))
                             {
-                                setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                                setObj = JObject.Parse(setInformation);
-                                if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                                setThumbnail = (string)setObj["data"]["thumbnail_url"];
+                                if (setThumbnail == null)
                                 {
-                                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                                    return "no results";
                                 }
-                                if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                                {
-                                    setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                                }
-                            }
-
-                            setObj = JObject.Parse(setInformation);
-                            if (!setObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                if (setObj.ContainsKey("data"))
-                                {
-                                    setThumbnail = (string)setObj["data"]["thumbnail_url"];
-                                    if (setThumbnail == null)
-                                    {
-                                        return "no results";
-                                    }                                    
-                                }
-                                else
-                                {
-                                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                                    var gearObj = JObject.Parse(setInformation);
-                                    if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                    {
-                                        setThumbnail = (string)gearObj["data"]["thumbnail_url"];
-                                        if (setThumbnail == null)
-                                        {
-                                            return "no results";
-                                        }                                   
-                                    }
-                                    else
-                                    {
-                                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                        Thread.Sleep(500);
-                                        return GetSetThumbnail(setID);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return GetSetThumbnail(setID);
+                                return setThumbnail;
                             }
                         }
                         else
@@ -392,7 +356,7 @@ namespace BrickLink
                             // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
                             Thread.Sleep(500);
                             return GetSetThumbnail(setID);
-                        }
+                        }                        
                     }
                 }
                 return setThumbnail;
@@ -432,64 +396,46 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        var setObj = JObject.Parse(setInformation);
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                        }
+                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        { 
+                            setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                        }                        
+                        // 5-21-2023 Added this section to deal with old booklets
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                        }
 
+                        JObject setObj = JObject.Parse(setInformation);
                         if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                            if (setObj.ContainsKey("data"))
                             {
-                                setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                                setObj = JObject.Parse(setInformation);
-                                if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                                setImage = (string)setObj["data"]["image_url"];
+                                if (setImage == null)
                                 {
-                                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                                    return "no results";
                                 }
-                            }
-
-                            setObj = JObject.Parse(setInformation);
-                            if (!setObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                if (setObj.ContainsKey("data"))
-                                {
-                                    setImage = (string)setObj["data"]["image_url"];
-                                    if (setImage == null)
-                                    {
-                                        return "no results";
-                                    }
-                                }
-                                else
-                                {
-                                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                                    var gearObj = JObject.Parse(setInformation);
-                                    if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                    {
-                                        setImage = (string)gearObj["data"]["image_url"];
-                                        if (setImage == null)
-                                        {
-                                            return "no results";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                        Thread.Sleep(500);
-                                        return GetSetThumbnail(setID);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return GetSetThumbnail(setID);
                             }
                         }
                         else
                         {
                             // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
                             Thread.Sleep(500);
-                            return GetSetThumbnail(setID);
+                            return GetSetImage(setID);
                         }
                     }
                 }
@@ -530,70 +476,50 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        var setObj = JObject.Parse(setInformation);
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                        }
+                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                        }
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                        }
+                        // 5-21-2023 Added this section to deal with old booklets
+                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        {
+                            setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                        }
 
-
+                        JObject setObj = JObject.Parse(setInformation);
                         if (!setObj.ToString().Contains("TIMESTAMP"))
                         {
-                            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                            if (setObj.ContainsKey("data"))
                             {
-                                setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                                setObj = JObject.Parse(setInformation);
-                                if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !!setObj.ContainsKey("data") || !setObj["data"].HasValues)
+                                setYear = (string)setObj["data"]["year_released"];
+                                if (setYear == null)
                                 {
-                                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                                    return "no results";
                                 }
-                                if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                                {
-                                    setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                                }
-                            }
-
-                            setObj = JObject.Parse(setInformation);
-                            if (!setObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                if (setObj.ContainsKey("data"))
-                                {
-                                    setYear = (string)setObj["data"]["year_released"];
-                                    if (setYear == null)
-                                    {
-                                        return "no results";
-                                    }
-                                }
-                                else
-                                {
-                                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                                    var gearObj = JObject.Parse(setInformation);
-                                    if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                    {
-                                        setYear = (string)gearObj["data"]["year_released"];
-                                        if (setYear == null)
-                                        {
-                                            return "no results";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                        Thread.Sleep(500);
-                                        return GetSetThumbnail(setID);
-                                    }
-                                }
+                                return setYear;
                             }
                             else
                             {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return GetSetThumbnail(setID);
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return GetSetThumbnail(setID);
+                                }
                             }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetThumbnail(setID);
-                        }
+                        }                        
                     }
                 }
                 return setYear;
@@ -628,61 +554,41 @@ namespace BrickLink
                 }
                 else
                 {
-                    setPrice = GetSetInformation(brickLinkSetURL + setID + "-1", "price");
-                    var setObj = JObject.Parse(setPrice);
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "price");
+                    if (setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkSetURL + setID, "price");
+                    }
+                    if (setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID, "price");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "price");
+                    }
+                    if (setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID, "price");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "price");
+                    }
+
+                    var setObj = JObject.Parse(setInformation);
                     if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                        if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || (int)setObj["data"].Count() == 0)
+                        if (setObj.ContainsKey("data"))
                         {
-                            setPrice = GetSetInformation(brickLinkSetURL + setID, "price");
-                            setObj = JObject.Parse(setPrice);
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || (int)setObj["data"].Count() == 0)
+                            setPrice = (string)setObj["data"]["avg_price"];
+                            if (setPrice == null)
                             {
-                                setPrice = GetSetInformation(brickLinkMiniFigURL + setID, "price");
+                                return "no results";
                             }
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                            {
-                                setPrice = GetSetInformation(brickLinkPartURL + setID, "price");
-                            }
-                        }
-
-                        setObj = JObject.Parse(setPrice);
-                        if (!setObj.ToString().Contains("TIMESTAMP"))
-                        {
-                            if (setObj.ContainsKey("data"))
-                            {
-                                setPrice = (string)setObj["data"]["avg_price"];
-                                if (setPrice == null)
-                                {
-                                    return "no results";
-                                }                                
-                            }
-                            else
-                            {
-                                setPrice = GetSetInformation(brickLinkGearURL + setID, "price");
-                                var gearObj = JObject.Parse(setPrice);
-                                if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                {
-                                    setPrice = (string)gearObj["data"]["avg_price"];
-                                    if (setPrice == null)
-                                    {
-                                        return "no results";
-                                    }
-                                }
-                                else
-                                {
-                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                    Thread.Sleep(500);
-                                    return GetSetPrice(setID);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetPrice(setID);
+                            return setPrice;
                         }
                     }
                     else
@@ -690,8 +596,8 @@ namespace BrickLink
                         // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
                         Thread.Sleep(500);
                         return GetSetPrice(setID);
-                    }                    
-                }
+                    }
+                }                                                        
                 return setPrice;
             }
             catch (Exception ex)
@@ -725,70 +631,48 @@ namespace BrickLink
                 }
                 else
                 {
-                    setCategory = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    var setObj = JObject.Parse(setCategory);
-                    if (!setObj.ToString().Contains("TIMESTAMP"))
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
                     {
-                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                        if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || (int)setObj["data"].Count() == 0)
-                        {
-                            setCategory = GetSetInformation(brickLinkSetURL + setID, "info");
-                            setObj = JObject.Parse(setCategory);
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || (int)setObj["data"].Count() == 0)
-                            {
-                                setCategory = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                            }
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                            {
-                                setCategory = GetSetInformation(brickLinkPartURL + setID, "info");
-                            }
-                        }
-
-                        setObj = JObject.Parse(setCategory);
-                        if (!setObj.ToString().Contains("TIMESTAMP"))
-                        {
-                            if (setObj.ContainsKey("data"))
-                            {
-                                setCategory = (string)setObj["data"]["category_id"];
-                                if (setCategory == null)
-                                {
-                                    return "no results";
-                                }
-                            }
-                            else
-                            {
-                                setCategory = GetSetInformation(brickLinkGearURL + setID, "info");
-                                var gearObj = JObject.Parse(setCategory);
-                                if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                {
-                                    setCategory = (string)gearObj["data"]["category_id"];
-                                    if (setCategory == null)
-                                    {
-                                        return "no results";
-                                    }
-                                }
-                                else
-                                {
-                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                    Thread.Sleep(500);
-                                    return GetSetCategory(setID);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetCategory(setID);
-                        }
+                        setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                     }
 
+                    var setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
+                    {
+                        if (setObj.ContainsKey("data"))
+                        {
+                            setCategory = (string)setObj["data"]["category_id"];
+                            if (setCategory == null)
+                            {
+                                return "no results";
+                            }
+                        }
+                    }
                     else
                     {
                         // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
                         Thread.Sleep(500);
                         return GetSetCategory(setID);
-                    }
+                    }                    
                 
 
                     if (setCategory != null)
@@ -854,67 +738,40 @@ namespace BrickLink
 
                 if (!(cacheReader.HasRows))
                 {
-                    string setNameJSON = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    var setObj = JObject.Parse(setNameJSON);
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                    }
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                    }
+
+                    var setObj = JObject.Parse(setInformation);
+                    setName = (string)setObj["data"]["name"] ?? "N/A";
                     if (!setObj.ToString().Contains("TIMESTAMP"))
                     {
-                        // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                        if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                        {
-                            setNameJSON = GetSetInformation(brickLinkSetURL + setID, "info");
-                            setObj = JObject.Parse(setNameJSON);
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                            {
-                                setNameJSON = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                            }
-                            if ((string)setObj["meta"]["code"] == "404" || (string)setObj["meta"]["code"] == "400" || !setObj.ContainsKey("data") || !setObj["data"].HasValues)
-                            {
-                                setNameJSON = GetSetInformation(brickLinkPartURL + setID, "info");
-                            }
-                        }
-
-
-                        setObj = JObject.Parse(setNameJSON);
+                        // get set information
                         setName = (string)setObj["data"]["name"] ?? "N/A";
-                        if (setName != "N/A")
-                        {
-                            // get set information
-                            setType = (string)setObj["data"]["type"] ?? "N/A";
-                            setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
-                            setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
-                            setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
-                        }
-                        else
-                        {
-                            string gearNameJSON = GetSetInformation(brickLinkGearURL + setID, "info");
-                            var gearObj = JObject.Parse(gearNameJSON);
-                            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not
-                            if ((string)gearObj["meta"]["code"] == "404" || (string)gearObj["meta"]["code"] == "400" || !gearObj.ContainsKey("data") || !gearObj["data"].HasValues)
-                            {
-                                setNameJSON = GetSetInformation(brickLinkSetURL + setID, "info");
-                                setObj = JObject.Parse(setNameJSON);
-                                if ((string)gearObj["meta"]["code"] == "404" || (string)gearObj["meta"]["code"] == "400" || !gearObj.ContainsKey("data") || !gearObj["data"].HasValues)
-                                {
-                                    setNameJSON = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                                }
-                            }
-                            gearObj = JObject.Parse(gearNameJSON);
-                            if (!gearObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                // get set information
-                                setName = (string)gearObj["data"]["name"] ?? "N/A";
-                                setType = (string)gearObj["data"]["type"] ?? "N/A";
-                                setImageURL = "https:" + (string)gearObj["data"]["image_url"] ?? "N/A";
-                                setThumbnailURL = "https:" + (string)gearObj["data"]["thumbnail_url"] ?? "N/A";
-                                setYear_released = (string)gearObj["data"]["year_released"] ?? "N/A";
-                            }
-                            else
-                            {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return Check_cache(setID);
-                            }
-                        }
+                        setType = (string)setObj["data"]["type"] ?? "N/A";
+                        setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
+                        setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
+                        setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
                     }
                     else
                     {
@@ -923,51 +780,40 @@ namespace BrickLink
                         return Check_cache(setID);
                     }
 
+
                     // Get set price
                     string setPrice = GetSetPrice(setID);
 
                     // get set category
                     string category_id = GetSetCategory(setID);
 
-                    if (setName != "N/A")
-                    {
-                        string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated)";
-                        SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
-                        insertCommand.Parameters.AddWithValue("@ID", setID);
-                        insertCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
-                        insertCommand.Parameters.AddWithValue("@type", setType);
-                        insertCommand.Parameters.AddWithValue("@categoryID", HttpUtility.HtmlDecode(category_id));
-                        insertCommand.Parameters.AddWithValue("@imageURL", setImageURL);
-                        insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                        insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                        insertCommand.Parameters.AddWithValue("@avg_price", setPrice);
-                        insertCommand.Parameters.AddWithValue("@date_updated", today);
-                        string debugSQL = insertCommand.ToString();
-                        int result = insertCommand.ExecuteNonQuery();
 
-                        // check for errors
-                        if (result < 0)
-                        {
-                            cacheReader.Close();
-                            setCacheConnection.Close();
-                            return "There was an error inserting the values to the DB";
-                        }
-                        else
-                        {
-                            cacheReader.Close();
-                            setCacheConnection.Close();
-                            return "SetIsInCache";
-                        }
-                    }
-                    else
+
+                    string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated)";
+                    SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
+                    insertCommand.Parameters.AddWithValue("@ID", setID);
+                    insertCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
+                    insertCommand.Parameters.AddWithValue("@type", setType);
+                    insertCommand.Parameters.AddWithValue("@categoryID", HttpUtility.HtmlDecode(category_id));
+                    insertCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                    insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
+                    insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
+                    insertCommand.Parameters.AddWithValue("@avg_price", setPrice);
+                    insertCommand.Parameters.AddWithValue("@date_updated", today);
+                    string debugSQL = insertCommand.ToString();
+                    int result = insertCommand.ExecuteNonQuery();
+
+                    // check for errors
+                    if (result < 0)
                     {
                         cacheReader.Close();
                         setCacheConnection.Close();
-                        return "No results where found";
+                        return "There was an error inserting the values to the DB";
                     }
                 }
                 else
                 {
+
                     while (cacheReader.Read())
                     {
                         string dbDate = cacheReader["date_updated"].ToString();
@@ -977,47 +823,53 @@ namespace BrickLink
                         // Check if 30 days has past since the last update and automatic update the cache records
                         if (diffOfDays.TotalDays > 30)
                         {
-                            string setNameJSON = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                            var setObj = JObject.Parse(setNameJSON);
-                            if ((int)setObj["data"].Count() != 0)
+                            string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
                             {
-                                if (!setObj.ToString().Contains("TIMESTAMP"))
+                                setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                            }
+                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            {
+                                setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                            }
+                            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            {
+                                setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                            }
+                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            {
+                                setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                            }
+                            // 5-21-2023 Added this section to deal with old booklets
+                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            {
+                                setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                            }
+                            // get set information
+                            var setObj = JObject.Parse(setInformation);
+                            if (!setObj.ToString().Contains("TIMESTAMP"))
+                            {
+                                if (setObj.ContainsKey("data"))
                                 {
-                                    // get set information
                                     setName = (string)setObj["data"]["name"] ?? "N/A";
                                     setType = (string)setObj["data"]["type"] ?? "N/A";
                                     setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
                                     setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
                                     setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
+
                                 }
                                 else
                                 {
-                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                    Thread.Sleep(500);
-                                    return Check_cache(setID);
+                                    return "No data found";
                                 }
                             }
                             else
                             {
-                                setNameJSON = GetSetInformation(brickLinkGearURL + setID, "info");
-                                var gearObj = JObject.Parse(setNameJSON);
-                                if (!gearObj.ToString().Contains("TIMESTAMP"))
-                                {
-                                    // get set information
-                                    setName = (string)gearObj["data"]["name"] ?? "N/A";
-                                    setType = (string)gearObj["data"]["type"] ?? "N/A";
-                                    setImageURL = "https:" + (string)gearObj["data"]["image_url"] ?? "N/A";
-                                    setThumbnailURL = "https:" + (string)gearObj["data"]["thumbnail_url"] ?? "N/A";
-                                    setYear_released = (string)gearObj["data"]["year_released"] ?? "N/A";
-                                }
-                                else
-                                {
-                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                    Thread.Sleep(500);
-                                    return Check_cache(setID);
-                                }
+                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                Thread.Sleep(500);
+                                return GetSetCategory(setID);
                             }
-
 
                             // Get set price
                             string setPrice = GetSetPrice(setID);
@@ -1048,11 +900,12 @@ namespace BrickLink
                                 return "SetIsInCache";
                             }
                         }
-                    }
-                    cacheReader.Close();
-                    setCacheConnection.Close();
-                    return "SetIsInCache";
+
+                    }                
                 }
+                cacheReader.Close();
+                setCacheConnection.Close();
+                return "SetIsInCache";
             }
             catch (Exception ex)
             {
