@@ -1,6 +1,6 @@
 ﻿// ***************************************************************************************
 // * BrickLink Excel function integration 
-// * Version 3.0 05-21-2023
+// * Version 2.1 05-24-2023
 // * Itamar Budin brickmindz@gmail.com
 // * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
@@ -8,6 +8,7 @@
 // This is version of the tool which includes
 //  * Code optimization for the DB cache
 //  * Better handling of URLs
+//  * Better handleing of set catergories and removing the old XML method.
 // Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
 // I am not a developer but know how to write basic code so please excuse any bad code writing :)
 
@@ -16,17 +17,13 @@
 
 using Newtonsoft.Json.Linq;
 using System;
-using System.Data;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Xml;
 using System.Data.SqlClient;
 using System.Web;
-using System.Linq;
-using System.Net.NetworkInformation;
 
 namespace BrickLink
 {
@@ -44,6 +41,8 @@ namespace BrickLink
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";  // BrickLink API Minifig URL
         const string brickLinkPartURL = "https://api.bricklink.com/api/store/v2/items/part/";  // BrickLink API Part URL
         const string brickLinkBooksURL = "https://api.bricklink.com/api/store/v2/items/book/";  // BrickLink API Book URL
+        const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";  // BrickLink API Book URL        
+
         public static string tokenx = "";
 
         // Added a new section to implmenet DB based cache
@@ -236,28 +235,29 @@ namespace BrickLink
                 else
                 {
                     string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                     }
                     // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                     }
                     // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                     }
+
 
                     JObject setObj = JObject.Parse(setInformation);
                     if (!setObj.ToString().Contains("TIMESTAMP"))
@@ -315,25 +315,25 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                         }
                         // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                         }
                         // 5-21-2023 Added this section to deal with old booklets
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                         }
@@ -396,25 +396,25 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                         }
                         // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         { 
                             setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                         }                        
                         // 5-21-2023 Added this section to deal with old booklets
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                         }
@@ -476,25 +476,25 @@ namespace BrickLink
                     else
                     {
                         string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                         }
                         // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                         }
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                         }
                         // 5-21-2023 Added this section to deal with old booklets
-                        if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                        if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                         {
                             setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                         }
@@ -612,6 +612,7 @@ namespace BrickLink
         {
             try
             {
+                string setCategoryID = "";
                 string setCategory = "";
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
                 SqlConnection setCategoryConnection = new SqlConnection(connectionString);
@@ -632,25 +633,25 @@ namespace BrickLink
                 else
                 {
                     string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                     }
                     // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                     }
                     // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                     }
@@ -660,8 +661,8 @@ namespace BrickLink
                     {
                         if (setObj.ContainsKey("data"))
                         {
-                            setCategory = (string)setObj["data"]["category_id"];
-                            if (setCategory == null)
+                            setCategoryID = (string)setObj["data"]["category_id"];
+                            if (setCategoryID == null)
                             {
                                 return "no results";
                             }
@@ -672,37 +673,29 @@ namespace BrickLink
                         // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
                         Thread.Sleep(500);
                         return GetSetCategory(setID);
-                    }                    
-                
+                    }
 
-                    if (setCategory != null)
+
+                    if (setCategoryID != null)
                     {
-                        XmlReader xmlFile;
-                        System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-                        xmlFile = XmlReader.Create(a.GetManifestResourceStream("BrickLink.bricklinkcategorylist.xml"), new XmlReaderSettings());
-                        DataSet ds = new DataSet();
-                        DataView dv;
-                        ds.ReadXml(xmlFile);
-
-                        dv = new DataView(ds.Tables[0])
+                        var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + setCategoryID, "info"));
+                        if (!catObj.ToString().Contains("TIMESTAMP"))
                         {
-                            Sort = "category_id"
-                        };
-
-                        int index = dv.Find(setCategory);
-
-                        if (index == -1)
-                        {
-                            setCategory = "no results";
-                        }
-                        else
-                        {
-                            setCategory = dv[index]["category_name"].ToString();
+                            if (setObj.ContainsKey("data"))
+                            {
+                                setCategory = (string)catObj["data"]["category_name"];
+                                if (setCategory == null)
+                                {
+                                    return "No Results Found";
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        return "no results";
+                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                        Thread.Sleep(500);
+                        return GetSetCategory(setID);
                     }
                     return setCategory;
                 }
@@ -736,28 +729,28 @@ namespace BrickLink
                 string setThumbnailURL = "";
                 string setYear_released = "";
 
-                if (!(cacheReader.HasRows))
+                if (!cacheReader.HasRows)
                 {
                     string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                     }
                     // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                     }
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                     }
                     // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                     }
@@ -824,25 +817,25 @@ namespace BrickLink
                         if (diffOfDays.TotalDays > 30)
                         {
                             string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                             {
                                 setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
                             }
-                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                             {
                                 setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
                             }
                             // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                             {
                                 setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
                             }
-                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                             {
                                 setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
                             }
                             // 5-21-2023 Added this section to deal with old booklets
-                            if (setInformation.Contains("404") || setInformation.Contains("400") || setInformation == null)
+                            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                             {
                                 setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
                             }
