@@ -34,8 +34,8 @@ namespace BrickLink
 
         const string consumerKey = "";        // The Consumer key
         const string consumerSecret = "";     // The Consumer Secret
-        const string tokenValue = "0F19808C0AB5429DAE2F9B971A3EDD03";         // The Token Value
-        const string tokenSecret = "425F2C8575E64A64940847D4C0E53737";        // The Token Secret
+        const string tokenValue = "";         // The Token Value
+        const string tokenSecret = "";        // The Token Secret
         const string brickLinkSetURL = "https://api.bricklink.com/api/store/v2/items/set/";  // BrickLink API Set URL
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";  // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";  // BrickLink API Minifig URL
@@ -46,8 +46,8 @@ namespace BrickLink
         public static string tokenx = "";
 
         // Added a new section to implmenet DB based cache
-        const string DataSource = "HomeServer.FR4G.LOCAL";       // The DB server name
-        const string InitialCatalog = "BrickLinkCache";   // The Database NAME
+        const string DataSource = "";       // The DB server name
+        const string InitialCatalog = "";   // The Database NAME
         const string DBUser = "";           // The DB username
         const string DBPassword = "";       // The DB password
 
@@ -279,7 +279,7 @@ namespace BrickLink
                         return GetSetName(setID);
                     }
                 }            
-                return setName;
+                return HttpUtility.HtmlDecode(setName);
             }
             catch (Exception ex)
             {
@@ -697,7 +697,7 @@ namespace BrickLink
                         Thread.Sleep(500);
                         return GetSetCategory(setID);
                     }
-                    return setCategory;
+                    return HttpUtility.HtmlDecode(setCategory);
                 }
             }
             catch (Exception ex)
