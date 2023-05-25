@@ -32,10 +32,10 @@ namespace BrickLink
         // TODO: In this section, you will need to enter the various secrets and keys that are assigned to you by Bricklink
         // For more information see: https://www.bricklink.com/v3/api.page
 
-        const string consumerKey = "";        // The Consumer key
-        const string consumerSecret = "";     // The Consumer Secret
-        const string tokenValue = "";         // The Token Value
-        const string tokenSecret = "";        // The Token Secret
+        const string consumerKey = "C4865A27BBDE40C8ABD4AE71E7307D4E";        // The Consumer key
+        const string consumerSecret = "E4BF5E55EAAD4C0BBD1F3B416B97FE80";     // The Consumer Secret
+        const string tokenValue = "0F19808C0AB5429DAE2F9B971A3EDD03";         // The Token Value
+        const string tokenSecret = "425F2C8575E64A64940847D4C0E53737";        // The Token Secret
         const string brickLinkSetURL = "https://api.bricklink.com/api/store/v2/items/set/";  // BrickLink API Set URL
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";  // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";  // BrickLink API Minifig URL
@@ -46,10 +46,10 @@ namespace BrickLink
         public static string tokenx = "";
 
         // Added a new section to implmenet DB based cache
-        const string DataSource = "";       // The DB server name
-        const string InitialCatalog = "";   // The Database NAME
-        const string DBUser = "";           // The DB username
-        const string DBPassword = "";       // The DB password
+        const string DataSource = "HomeServer.FR4G.LOCAL";       // The DB server name
+        const string InitialCatalog = "BrickLinkCache";   // The Database NAME
+        const string DBUser = "Bricklink";           // The DB username
+        const string DBPassword = "Giraffe1!";       // The DB password
 
 
         private static string Escape(string s)
@@ -555,25 +555,25 @@ namespace BrickLink
                 else
                 {
                     string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "price");
-                    if (setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkSetURL + setID, "price");
                     }
-                    if (setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkGearURL + setID, "price");
                     }
                     // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "price");
                     }
-                    if (setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkPartURL + setID, "price");
                     }
                     // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation == null)
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                     {
                         setInformation = GetSetInformation(brickLinkBooksURL + setID, "price");
                     }
