@@ -11,7 +11,7 @@
 //  * Better handleing of set catergories and removing the old XML method
 //  * 8/27/2023
 //      * Added two new methods:
-//        * GetSetPartsNumber - This method will retun the total number of parts, including extras for the set
+//        * GetSetPartsNumber - This method will return the total number of parts, including extras for the set
 //        * GetSetMinifigNumber - This method will return the number of minifigures for the set
 //      * added two int type columns to the DB schema
 //        * partnum - will hold the number of parts for the set
