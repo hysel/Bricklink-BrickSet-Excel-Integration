@@ -1,6 +1,6 @@
 ﻿// ***************************************************************************************
 // * BrickLink Excel function integration 
-// * Version 2.2 7/8/2023
+// * Version 2.3 8/27/2023
 // * Itamar Budin brickmindz@gmail.com
 // * Using code samples from multiple resource (see internal comments for reference) 
 // ***************************************************************************************
@@ -9,12 +9,20 @@
 //  * Code optimization for the DB cache
 //  * Better handling of URLs
 //  * Better handleing of set catergories and removing the old XML method
-//  * 7/8/2023 - Added better Error Handleing in case the input is empty
+//  * 8/27/2023
+//      * Added two new methods:
+//        * GetSetPartsNumber - This method will retun the total number of parts, including extras for the set
+//        * GetSetMinifigNumber - This method will return the number of minifigures for the set
+//      * added two int type columns to the DB schema
+//        * partnum - will hold the number of parts for the set
+//        * minifignum - will hold the number of minifigures for the set
+//      
 // Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
 // I am not a developer but know how to write basic code so please excuse any bad code writing :)
 
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
@@ -280,6 +288,141 @@ namespace BrickLink
                         }
                     }
                     return HttpUtility.HtmlDecode(setName);
+                }
+                else
+                {
+                    return "no results";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message.ToString();
+            }
+        }
+
+        //This function will return the item part number
+        //Note: This is no equal to the part number on the Bricklink webpage but incldude all parts and extras
+        public static string GetSetPartsNumber(string setID)
+        {
+            try
+            {
+                if (setID.Length > 0)
+                {
+                    int setPartNum = 0;
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1/subsets", "info");
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkSetURL + setID + "/subsets", "info");
+                    }
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID + "/subsets", "info");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID + "/subsets", "info");
+                    }
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID + "/subsets", "info");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", "info");
+                    }
+
+                    JObject setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
+                    {
+                        if (setObj.ContainsKey("data"))
+                        {
+                            IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'PART')].quantity");
+
+                            foreach (JToken part in partsonly)
+                            {
+                                setPartNum += (int)part;
+                            }
+
+                            return setPartNum.ToString();
+                        }
+                    }
+                    else
+                    {
+                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                        Thread.Sleep(500);
+                        return GetSetPartsNumber(setID);
+
+                    }
+                    return setPartNum.ToString();
+                }
+                else
+                {
+                    return "no results";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message.ToString();
+            }
+        }
+
+        //This function will return the number of minifigures for the set        
+        public static string GetSetMiniFigNumber(string setID)
+        {
+            try
+            {
+                if (setID.Length > 0)
+                {
+                    int setMiniFigNum = 0;
+                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1/subsets", "info");
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkSetURL + setID + "/subsets", "info");
+                    }
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkGearURL + setID + "/subsets", "info");
+                    }
+                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID + "/subsets", "info");
+                    }
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkPartURL + setID + "/subsets", "info");
+                    }
+                    // 5-21-2023 Added this section to deal with old booklets
+                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    {
+                        setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", "info");
+                    }
+
+                    JObject setObj = JObject.Parse(setInformation);
+                    if (!setObj.ToString().Contains("TIMESTAMP"))
+                    {
+                        if (setObj.ContainsKey("data"))
+                        {
+                            IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
+
+                            foreach (JToken part in partsonly)
+                            {
+                                setMiniFigNum += (int)part;
+                            }
+
+                            return setMiniFigNum.ToString();
+                        }
+                    }
+                    else
+                    {
+                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                        Thread.Sleep(500);
+                        return GetSetPartsNumber(setID);
+
+                    }
+                    return setMiniFigNum.ToString();
                 }
                 else
                 {
@@ -820,9 +963,14 @@ namespace BrickLink
                     // get set category
                     string category_id = GetSetCategory(setID);
 
+                    // get set number of parts
+                    string setPartNum = GetSetPartsNumber(setID);
+
+                    // get set number of minifigures
+                    string setminifigureNum = GetSetMiniFigNumber(setID);
 
 
-                    string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated)";
+                    string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated,partnum,minifignum) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated,@partnum,@minifignum)";
                     SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
                     insertCommand.Parameters.AddWithValue("@ID", setID);
                     insertCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
@@ -833,6 +981,8 @@ namespace BrickLink
                     insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
                     insertCommand.Parameters.AddWithValue("@avg_price", setPrice);
                     insertCommand.Parameters.AddWithValue("@date_updated", today);
+                    insertCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
+                    insertCommand.Parameters.AddWithValue("@minifignum", int.Parse(setminifigureNum));
                     string debugSQL = insertCommand.ToString();
                     int result = insertCommand.ExecuteNonQuery();
 
@@ -910,9 +1060,15 @@ namespace BrickLink
                             // get set category
                             string category_id = GetSetCategory(setID);
 
+                            // get set number of parts
+                            string setPartNum = GetSetPartsNumber(setID);
+
+                            // get set number of minifigures
+                            string setminifigureNum = GetSetMiniFigNumber(setID);
+
                             if (setName != "N/A")
                             {
-                                string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated where ID=@ID";
+                                string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum where ID=@ID";
                                 SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
                                 updateCommand.Parameters.AddWithValue("@ID", setID);
                                 updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
@@ -923,6 +1079,8 @@ namespace BrickLink
                                 updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
                                 updateCommand.Parameters.AddWithValue("@avg_price", setPrice);
                                 updateCommand.Parameters.AddWithValue("@date_updated", today);
+                                updateCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
+                                updateCommand.Parameters.AddWithValue("@minifignum", int.Parse(setminifigureNum));
                                 int result = updateCommand.ExecuteNonQuery();
 
                                 // check for errors
