@@ -42,9 +42,11 @@ Usage:
     - GetSetThumbnail(<set Number>)- Get the LEGO set Thumbnail URL
     - GetSetImage(<set Number>)- Get the LEGO set Image URL
     - GetSetYear(<set Number>)- Get the LEGO set release date
-    - GetSetPrice(<set Number>)- Get the LEGO set average price (Yes, I know this is not a good idea as the information is skewed due to someone putting ridiculous prices on a set. I will fix it 
+    - GetSetPrice(<set Number>)- Get the LEGO set average price. (Yes, I know this is not a good idea, as the information is skewed due to someone putting ridiculous prices on a set. I will fix it 
                                  in a later date)
     - GetSetCategory(<set Number>) - Get the LEGO set category. This is based on an XML file that is part of the solution that translates BrickLink category ID (found on the set JSON payload)
                                      to the human-friendly Name.
+    - GetSetPartsNumber(<set Number>) - This method will return the total number of parts, including extras for the set
+    - GetSetMinifigNumber(<set Number>) - This method will return the number of minifigures for the set  
 
 
