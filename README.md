@@ -69,31 +69,32 @@ This project aims to assist you in accessing information from LEGO sets, includi
 16) Go to another field, and you will be able to call the following functions while referencing the original field)
 
 **BrickLink:**
-GetSetNameFromBrickSet - This function will return the item name
-GetSetMiniFigNumberFromBrickLink - This function will return the number of minifigures for the set
-GetSetMiniFigCollectionFromBrickLink - This function will return the number of minifigures for the set
-GetSetThumbnailFromBrickLink - This function will return the item Thumbnail
-GetSetImageFromBrickLink - This function will return the item image
-GetSetReleaseYearFBrickLink - This function will return the item release year
-GetSetTypeFromBrickLink - This function will return the item type (Set, gear, etc.)
-GetSetAvgPriceFromBrickLink - This function will return the item's average price.
-GetSetCategoryFromBrickLink - This function will return the item category ID.
-BrickSet:
-GetSetNameFromBrickSet - This function will return the item name
-GetSetThemeFromBrickSet - This function will return the item theme
-GetSetImageURLFromBrickSet - This function will return the item image URL
-GetSetThumbnailURLFromBrickSet - This function will return the item thumbnail URL
-GetSetReleaseYearFromBrickSet - This function will return the item release year
-GetSetPartsNumberFromBrickSet - This function will return the item part number
-GetSetUPCFromBrickSet - This function will return the item UPC
-GetSetDescriptionFromBrickSet - This function will return the item description
-GetSetOriginalPriceFromBrickSet - This function will return the item's original retail price
+- GetSetNameFromBrickSet - This function will return the item name
+- GetSetMiniFigNumberFromBrickLink - This function will return the number of minifigures for the set
+- GetSetMiniFigCollectionFromBrickLink - This function will return the number of minifigures for the set
+- GetSetThumbnailFromBrickLink - This function will return the item Thumbnail
+- GetSetImageFromBrickLink - This function will return the item image
+- GetSetReleaseYearFBrickLink - This function will return the item release year
+- GetSetTypeFromBrickLink - This function will return the item type (Set, gear, etc.)
+- GetSetAvgPriceFromBrickLink - This function will return the item's average price.
+- GetSetCategoryFromBrickLink - This function will return the item category ID.
 
+**BrickSet:**
+- GetSetNameFromBrickSet - This function will return the item name
+- GetSetThemeFromBrickSet - This function will return the item theme
+- GetSetImageURLFromBrickSet - This function will return the item image URL
+- GetSetThumbnailURLFromBrickSet - This function will return the item thumbnail URL
+- GetSetReleaseYearFromBrickSet - This function will return the item release year
+- GetSetPartsNumberFromBrickSet - This function will return the item part number
+- GetSetUPCFromBrickSet - This function will return the item UPC
+- GetSetDescriptionFromBrickSet - This function will return the item description
+- GetSetOriginalPriceFromBrickSet - This function will return the item's original retail price
+- 
 **Miscellaneous:**
 updateSetInCache - This function will update the item record in the DB
 
 **Known Limitations:**
-- BrickSet is limiting the number of API Calls, so please make sure you have the proper permission before using it.
-- To avoid large number of API loads, make sure to copy and paste the values of the queries back to the excel spreadsheet.
+- BrickSet limits the number of API Calls, so please ensure you have the proper permission before using it.
+- To avoid a large number of API loads, copy and paste the values of the queries back to the Excel spreadsheet.
 
 
