@@ -46,8 +46,8 @@ namespace BrickLinkBrickSet
         const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";       // BrickLink API Book URL        
 
         // BrickSet
-        const string brickSetApiKey = "";                      // Brickset API Key
-        const string bricksHash = "";                                 // Brickset Hash        
+        const string brickSetApiKey = "";                                       // Brickset API Key
+        const string bricksHash = "";                                           // Brickset Hash        
         const string brickSetSOAPUrl = "https://brickset.com/api/v3.asmx";      // Brickset URL
         const string brickSetPartNumberAttribute = "pieces";                    // Bricket set part number attribute
         const string brickSetNameAttribute = "name";                            // Bricket set name attribute
@@ -62,24 +62,24 @@ namespace BrickLinkBrickSet
         public static string tokenx = "";
 
         // DB Details (for cache)
-        const string DataSource = "";                 // The DB server name
-        const string InitialCatalog = "";         // The Database NAME
-        const string DBUser = "";                      // The DB username
-        const string DBPassword = "";                  // The DB password        
-        const string dbIDAttribute = "ID";                      // The DB columne that holds the set number        
-        const string dbNameAttribute = "name";                  // The DB columne that holds the set name        
-        const string dbTypeAttribute = "type";                  // The DB columne that holds the set name        
-        const string dbCategoryIDAttribute = "categoryID";      // The DB columne that holds the set category  
-        const string dbImageURLAttribute = "imageURL";          // The DB columne that holds the set image URL 
-        const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB columne that holds the set thumbnail URL 
-        const string dbYearAttribute = "year_released";         // The DB columne that holds the set release year  
-        const string dbAvgPriceAttribute = "avg_price";         // The DB columne that holds the set avarage price year (BrickLink only)
-        const string dbPartNumberAttribute = "partnum";         // The DB columne that holds the set part number     
-        const string dbNumOfMinifigsAttribute = "minifignum";   // The DB columne that holds the set number of minifig (Bricklink only)    
-        const string dbUPCAttribute = "UPC";                    // The DB columne that holds the set UPC    
-        const string dbDescriptoinAttribute = "description";    // The DB columne that holds the set description    
-        const string dbOrgPriceAttribute = "original_price";    // The DB columne that holds the set original price   
-        const string dbSetMinifiguresAttribute = "minifigset";    // The DB columne that holds the set original price   
+        const string DataSource = "";                           // The DB server name
+        const string InitialCatalog = "";                       // The Database NAME
+        const string DBUser = "";                               // The DB username
+        const string DBPassword = "";                           // The DB password        
+        const string dbIDAttribute = "ID";                      // The DB column that holds the set number        
+        const string dbNameAttribute = "name";                  // The DB column that holds the set name        
+        const string dbTypeAttribute = "type";                  // The DB column that holds the set name        
+        const string dbCategoryIDAttribute = "categoryID";      // The DB column that holds the set category  
+        const string dbImageURLAttribute = "imageURL";          // The DB column that holds the set image URL 
+        const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB column that holds the set thumbnail URL 
+        const string dbYearAttribute = "year_released";         // The DB column that holds the set release year  
+        const string dbAvgPriceAttribute = "avg_price";         // The DB column that holds the set average price year (BrickLink only)
+        const string dbPartNumberAttribute = "partnum";         // The DB column that holds the set part number     
+        const string dbNumOfMinifigsAttribute = "minifignum";   // The DB column that holds the set number of minifig (Bricklink only)    
+        const string dbUPCAttribute = "UPC";                    // The DB column that holds the set UPC    
+        const string dbDescriptoinAttribute = "description";    // The DB column that holds the set description    
+        const string dbOrgPriceAttribute = "original_price";    // The DB column that holds the set original price   
+        const string dbSetMinifiguresAttribute = "minifigset";  // The DB column that holds the set original price   
 
 
 
