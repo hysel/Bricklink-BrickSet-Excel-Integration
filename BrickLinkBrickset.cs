@@ -2,15 +2,15 @@
 // * BrickLink/BrickeSet Excel function integration 
 // * Version 3.0 11/9/2023
 // * Itamar Budin brickmindz@gmail.com
-// * Using code samples from multiple resource (see internal comments for reference) 
+// * Using code samples from multiple resources (see internal comments for reference) 
 // ***************************************************************************************
-// This solution is using the Excel-DNA plug-in. For more details, see the ExcelDna.AddIn.md file
-// This is version of the tool which includes
-//  * Introduced new intgeation with BrickSet 
+// This solution is using the Excel-DNA plug-in. If you would like more details, please look at the ExcelDna.AddIn.md file
+// This version of the tool which includes
+//  * Introduced new integration with BrickSet 
 //  * Major code optimization to reduce code duplication (I know I can do better :)
 //      
-// Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
-// I am not a developer but know how to write basic code so please excuse any bad code writing :)
+// Pre-requisites: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
+// I am not a developer, but I know how to write basic code, so please excuse any lousy code writing :)
 
 using Newtonsoft.Json.Linq;
 using System;
