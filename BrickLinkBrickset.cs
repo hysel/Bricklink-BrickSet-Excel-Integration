@@ -34,10 +34,10 @@ namespace BrickLinkBrickSet
         //  BrickSet: https://brickset.com/api/v3.asmx
 
         // BrickLink 
-        const string consumerKey = "C4865A27BBDE40C8ABD4AE71E7307D4E";                                  // The Consumer key
-        const string consumerSecret = "E4BF5E55EAAD4C0BBD1F3B416B97FE80";                               // The Consumer Secret
-        const string tokenValue = "AAF7EFE8A7144E5083573244D155C432";                                   // The Token Value
-        const string tokenSecret = "455F06122E314623A36BE300E84F847B";                                  // The Token Secret
+        const string consumerKey = "";                                  // The Consumer key
+        const string consumerSecret = "";                               // The Consumer Secret
+        const string tokenValue = "";                                   // The Token Value
+        const string tokenSecret = "";                                  // The Token Secret
         const string brickLinkSetURL = "https://api.bricklink.com/api/store/v2/items/set/";             // BrickLink API Set URL
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";           // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";     // BrickLink API Minifig URL
@@ -46,8 +46,8 @@ namespace BrickLinkBrickSet
         const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";       // BrickLink API Book URL        
 
         // BrickSet
-        const string brickSetApiKey = "3-BrE6-CGbn-zFYoz";                      // Brickset API Key
-        const string bricksHash = "vuq3QdZEmZ";                                 // Brickset Hash        
+        const string brickSetApiKey = "";                      // Brickset API Key
+        const string bricksHash = "";                                 // Brickset Hash        
         const string brickSetSOAPUrl = "https://brickset.com/api/v3.asmx";      // Brickset URL
         const string brickSetPartNumberAttribute = "pieces";                    // Bricket set part number attribute
         const string brickSetNameAttribute = "name";                            // Bricket set name attribute
@@ -61,11 +61,11 @@ namespace BrickLinkBrickSet
 
         public static string tokenx = "";
 
-        // DB Detailes (for cache)
-        const string DataSource = "HomeServer";                 // The DB server name
-        const string InitialCatalog = "BrickLinkCache";         // The Database NAME
-        const string DBUser = "Bricklink";                      // The DB username
-        const string DBPassword = "Giraffe1!";                  // The DB password        
+        // DB Details (for cache)
+        const string DataSource = "";                 // The DB server name
+        const string InitialCatalog = "";         // The Database NAME
+        const string DBUser = "";                      // The DB username
+        const string DBPassword = "";                  // The DB password        
         const string dbIDAttribute = "ID";                      // The DB columne that holds the set number        
         const string dbNameAttribute = "name";                  // The DB columne that holds the set name        
         const string dbTypeAttribute = "type";                  // The DB columne that holds the set name        
