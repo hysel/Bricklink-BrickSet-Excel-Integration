@@ -61,9 +61,9 @@ namespace BrickLinkBrickSet
 
         public static string tokenx = "";
 
-        // DB Detailes (for cache)
-        const string DataSource = "HomeServer";                 // The DB server name
-        const string InitialCatalog = "BrickLinkCache";         // The Database NAME
+        // DB Details (for cache)
+        const string DataSource = "";                 // The DB server name
+        const string InitialCatalog = "";         // The Database NAME
         const string DBUser = "";                      // The DB username
         const string DBPassword = "";                  // The DB password        
         const string dbIDAttribute = "ID";                      // The DB columne that holds the set number        
