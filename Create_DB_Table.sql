@@ -1,7 +1,7 @@
 USE [BrickLinkCache]
 GO
 
-/****** Object:  Table [dbo].[Sets]    Script Date: 8/27/2023 1:02:05 PM ******/
+/****** Object:  Table [dbo].[Sets]    Script Date: 11/12/2023 7:08:43 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -19,7 +19,11 @@ CREATE TABLE [dbo].[Sets](
 	[avg_price] [nvarchar](max) NULL,
 	[date_updated] [datetime] NULL,
 	[partnum] [int] NULL,
-	[minifignum] [int] NULL
+	[minifignum] [int] NULL,
+	[UPC] [nvarchar](max) NULL,
+	[description] [nvarchar](max) NULL,
+	[original_price] [nvarchar](max) NULL,
+	[minifigset] [nvarchar](max) NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
