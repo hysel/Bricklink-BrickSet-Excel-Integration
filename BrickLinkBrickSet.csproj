@@ -55,9 +55,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Properties\ExcelDna.Build.props" />
     <None Include="BrickLinkBrickSet-AddIn.dna" />
     <None Include="packages.config" />
-    <None Include="Properties\ExcelDna.Build.props" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrickLinkBrickset.cs" />

@@ -2,15 +2,15 @@
 // * BrickLink/BrickeSet Excel function integration 
 // * Version 3.0 11/9/2023
 // * Itamar Budin brickmindz@gmail.com
-// * Using code samples from multiple resource (see internal comments for reference) 
+// * Using code samples from multiple resources (see internal comments for reference) 
 // ***************************************************************************************
-// This solution is using the Excel-DNA plug-in. For more details, see the ExcelDna.AddIn.md file
-// This is version of the tool which includes
-//  * Introduced new intgeation with BrickSet 
+// This solution is using the Excel-DNA plug-in. If you would like more details, please look at the ExcelDna.AddIn.md file
+// This version of the tool which includes
+//  * Introduced new integration with BrickSet 
 //  * Major code optimization to reduce code duplication (I know I can do better :)
 //      
-// Pre-requisits: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
-// I am not a developer but know how to write basic code so please excuse any bad code writing :)
+// Pre-requisites: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
+// I am not a developer, but I know how to write basic code, so please excuse any lousy code writing :)
 
 using Newtonsoft.Json.Linq;
 using System;
@@ -34,10 +34,10 @@ namespace BrickLinkBrickSet
         //  BrickSet: https://brickset.com/api/v3.asmx
 
         // BrickLink 
-        const string consumerKey = "C4865A27BBDE40C8ABD4AE71E7307D4E";                                  // The Consumer key
-        const string consumerSecret = "E4BF5E55EAAD4C0BBD1F3B416B97FE80";                               // The Consumer Secret
-        const string tokenValue = "AAF7EFE8A7144E5083573244D155C432";                                   // The Token Value
-        const string tokenSecret = "455F06122E314623A36BE300E84F847B";                                  // The Token Secret
+        const string consumerKey = "";                                                                  // The Consumer key
+        const string consumerSecret = "";                                                               // The Consumer Secret
+        const string tokenValue = "";                                                                   // The Token Value
+        const string tokenSecret = "";                                                                  // The Token Secret
         const string brickLinkSetURL = "https://api.bricklink.com/api/store/v2/items/set/";             // BrickLink API Set URL
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v2/items/gear/";           // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";     // BrickLink API Minifig URL
@@ -46,8 +46,8 @@ namespace BrickLinkBrickSet
         const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";       // BrickLink API Book URL        
 
         // BrickSet
-        const string brickSetApiKey = "3-BrE6-CGbn-zFYoz";                      // Brickset API Key
-        const string bricksHash = "vuq3QdZEmZ";                                 // Brickset Hash        
+        const string brickSetApiKey = "";                                       // Brickset API Key
+        const string bricksHash = "";                                           // Brickset Hash        
         const string brickSetSOAPUrl = "https://brickset.com/api/v3.asmx";      // Brickset URL
         const string brickSetPartNumberAttribute = "pieces";                    // Bricket set part number attribute
         const string brickSetNameAttribute = "name";                            // Bricket set name attribute
@@ -62,29 +62,27 @@ namespace BrickLinkBrickSet
         public static string tokenx = "";
 
         // DB Detailes (for cache)
-        const string DataSource = "HomeServer";                 // The DB server name
-        const string InitialCatalog = "BrickLinkCache";         // The Database NAME
-        const string DBUser = "Bricklink";                      // The DB username
-        const string DBPassword = "Giraffe1!";                  // The DB password        
-        const string dbIDAttribute = "ID";                      // The DB columne that holds the set number        
-        const string dbNameAttribute = "name";                  // The DB columne that holds the set name        
-        const string dbTypeAttribute = "type";                  // The DB columne that holds the set name        
-        const string dbCategoryIDAttribute = "categoryID";      // The DB columne that holds the set category  
-        const string dbImageURLAttribute = "imageURL";          // The DB columne that holds the set image URL 
-        const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB columne that holds the set thumbnail URL 
-        const string dbYearAttribute = "year_released";         // The DB columne that holds the set release year  
-        const string dbAvgPriceAttribute = "avg_price";         // The DB columne that holds the set avarage price year (BrickLink only)
-        const string dbPartNumberAttribute = "partnum";         // The DB columne that holds the set part number     
-        const string dbNumOfMinifigsAttribute = "minifignum";   // The DB columne that holds the set number of minifig (Bricklink only)    
-        const string dbUPCAttribute = "UPC";                    // The DB columne that holds the set UPC    
-        const string dbDescriptoinAttribute = "description";    // The DB columne that holds the set description    
-        const string dbOrgPriceAttribute = "original_price";    // The DB columne that holds the set original price   
+        const string DataSource = "";                           // The DB server name
+        const string InitialCatalog = "";                       // The Database NAME
+        const string DBUser = "";                               // The DB username
+        const string DBPassword = "";                           // The DB password        
+        const string dbIDAttribute = "ID";                      // The DB column that holds the set number        
+        const string dbNameAttribute = "name";                  // The DB column that holds the set name        
+        const string dbTypeAttribute = "type";                  // The DB column that holds the set name        
+        const string dbCategoryIDAttribute = "categoryID";      // The DB column that holds the set category  
+        const string dbImageURLAttribute = "imageURL";          // The DB column that holds the set image URL 
+        const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB column that holds the set thumbnail URL 
+        const string dbYearAttribute = "year_released";         // The DB column that holds the set release year  
+        const string dbAvgPriceAttribute = "avg_price";         // The DB column that holds the set average price year (BrickLink only)
+        const string dbPartNumberAttribute = "partnum";         // The DB column that holds the set part number     
+        const string dbNumOfMinifigsAttribute = "minifignum";   // The DB column that holds the set number of minifig (Bricklink only)    
+        const string dbUPCAttribute = "UPC";                    // The DB column that holds the set UPC    
+        const string dbDescriptoinAttribute = "description";    // The DB column that holds the set description    
+        const string dbOrgPriceAttribute = "original_price";    // The DB column that holds the set original price   
         const string dbSetMinifiguresAttribute = "minifigset";    // The DB columne that holds the set original price   
 
-
-
         // Read set infromation from DB
-        private static string readSetInformationFromDB(String setID, String columnInput)
+        private static string ReadSetInformationFromDB(String setID, String columnInput)
         {
             try
             {
@@ -390,7 +388,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setNameFromDB = readSetInformationFromDB(setID, dbNameAttribute);
+                string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
                 string setName = GetSetInformationFromBrickLink(setID, dbNameAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -419,7 +417,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setNumberOfMinifiguresFromDB = readSetInformationFromDB(setID, dbNumOfMinifigsAttribute);
+                string setNumberOfMinifiguresFromDB = ReadSetInformationFromDB(setID, dbNumOfMinifigsAttribute);
                 string setNumberOfMinifigures = setNumberOfMinifigures = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -448,7 +446,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setMiniFigCollectionFromDB = readSetInformationFromDB(setID, dbSetMinifiguresAttribute);
+                string setMiniFigCollectionFromDB = ReadSetInformationFromDB(setID, dbSetMinifiguresAttribute);
                 string SetMiniFigCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -477,7 +475,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setThumbnailFromDB = readSetInformationFromDB(setID, dbThumbnailURLAttribute);
+                string setThumbnailFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
                 string SetThumbnail = GetSetInformationFromBrickLink(setID, dbThumbnailURLAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -507,7 +505,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setImageFromDB = readSetInformationFromDB(setID, dbImageURLAttribute);
+                string setImageFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
                 string SetImage = GetSetInformationFromBrickLink(setID, dbImageURLAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -536,7 +534,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setYearFromDB = readSetInformationFromDB(setID, dbYearAttribute);
+                string setYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
                 string setYear = GetSetInformationFromBrickLink(setID, dbYearAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -565,7 +563,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string SetTypeFromDB = readSetInformationFromDB(setID, dbTypeAttribute);
+                string SetTypeFromDB = ReadSetInformationFromDB(setID, dbTypeAttribute);
                 string SetType = GetSetInformationFromBrickLink(setID, dbTypeAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -594,7 +592,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string SetAvgPriceFromDB = readSetInformationFromDB(setID, dbAvgPriceAttribute);
+                string SetAvgPriceFromDB = ReadSetInformationFromDB(setID, dbAvgPriceAttribute);
                 string SetAvgPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -624,7 +622,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string SetCategoryFromDB = readSetInformationFromDB(setID, dbCategoryIDAttribute);
+                string SetCategoryFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
                 string SetCategory = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -666,7 +664,7 @@ namespace BrickLinkBrickSet
             try
             {
                 string SetURL = brickLinkSetURL + setID + "-1";
-                string cacheReader = readSetInformationFromDB(setID, dbIDAttribute);
+                string cacheReader = ReadSetInformationFromDB(setID, dbIDAttribute);
                 DateTime today = DateTime.Now;
                 today.ToString("yyyy-MM-dd");
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
@@ -1010,7 +1008,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setNameFromDB = readSetInformationFromDB(setID, dbNameAttribute);
+                string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
                 string setName = GetSetAttributeFromBrickSet(setID, brickSetNameAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1050,7 +1048,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setPartNumFromDB = readSetInformationFromDB(setID, dbCategoryIDAttribute);
+                string setPartNumFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
                 string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetThemeAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1090,7 +1088,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setImageURLFromDB = readSetInformationFromDB(setID, dbImageURLAttribute);
+                string setImageURLFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
                 string setImageURL = GetSetAttributeFromBrickSet(setID, brickSetImageURLAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1130,7 +1128,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setThumbnailURLFromDB = readSetInformationFromDB(setID, dbThumbnailURLAttribute);
+                string setThumbnailURLFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
                 string setThumbnailURL = GetSetAttributeFromBrickSet(setID, brickSetThumbnailURLAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1170,7 +1168,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setReleaseYearFromDB = readSetInformationFromDB(setID, dbYearAttribute);
+                string setReleaseYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
                 string setReleaseYear = GetSetAttributeFromBrickSet(setID, brickSetYearAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1210,7 +1208,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setPartNumFromDB = readSetInformationFromDB(setID, dbPartNumberAttribute);
+                string setPartNumFromDB = ReadSetInformationFromDB(setID, dbPartNumberAttribute);
                 string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1250,7 +1248,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setUPCFromDB = readSetInformationFromDB(setID, dbUPCAttribute);
+                string setUPCFromDB = ReadSetInformationFromDB(setID, dbUPCAttribute);
                 string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1290,7 +1288,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string SetDescriptionFromDB = readSetInformationFromDB(setID, dbDescriptoinAttribute);
+                string SetDescriptionFromDB = ReadSetInformationFromDB(setID, dbDescriptoinAttribute);
                 string SetDescription = GetSetAttributeFromBrickSet(setID, brickSetDescriptionAttribute);
                 Boolean callDB = false;
                 while (!callDB)
@@ -1330,34 +1328,39 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string setOrgPriceFromDB = readSetInformationFromDB(setID, dbOrgPriceAttribute);
-                string setOrgPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + country);
-                Boolean callDB = false;
-                while (!callDB)
+                if (country == "US" || country == "UK" || country == "DE" || country == "CA")
                 {
-                    if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "")
+                    string setOrgPriceFromDB = ReadSetInformationFromDB(setID, dbOrgPriceAttribute);
+                    string setOrgPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + country);
+                    Boolean callDB = false;
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "")
                         {
-                            return setOrgPrice;
-                        }
-                        else if (setOrgPrice != setOrgPriceFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setOrgPrice;
+                            }
+                            else if (setOrgPrice != setOrgPriceFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setOrgPrice;
+                            }
                         }
                         else
                         {
                             return setOrgPrice;
                         }
                     }
-                    else
-                    {
-                        return setOrgPrice;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbOrgPriceAttribute);
+                    return GetSetOriginalPriceFromBrickSet(setID, country);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbOrgPriceAttribute);
-                return GetSetOriginalPriceFromBrickSet(setID,country);
+                else
+                    return "Wrong country code entered, accetable values are: US, UK, CA and DE";
             }
             catch (Exception ex)
             {
