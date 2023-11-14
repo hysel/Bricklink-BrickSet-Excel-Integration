@@ -88,7 +88,7 @@ This project aims to assist you in accessing information from LEGO sets, includi
 - GetSetPartsNumberFromBrickSet - This function will return the item part number
 - GetSetUPCFromBrickSet - This function will return the item UPC
 - GetSetDescriptionFromBrickSet - This function will return the item description
-- GetSetOriginalPriceFromBrickSet - This function will return the item's original retail price
+- GetSetOriginalPriceFromBrickSet - This function will return the item's original retail price, Acceptable input: US, UK, CA, DE
 - 
 **Miscellaneous:**
 updateSetInCache - This function will update the item record in the DB
