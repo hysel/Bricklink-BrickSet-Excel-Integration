@@ -79,7 +79,7 @@ namespace BrickLinkBrickSet
         const string dbUPCAttribute = "UPC";                    // The DB column that holds the set UPC    
         const string dbDescriptoinAttribute = "description";    // The DB column that holds the set description    
         const string dbOrgPriceAttribute = "original_price";    // The DB column that holds the set original price   
-        const string dbSetMinifiguresAttribute = "minifigset";    // The DB columne that holds the set original price   
+        const string dbSetMinifiguresAttribute = "minifigset";  // The DB columne that holds the set original price   
 
         // Read set infromation from DB
         private static string ReadSetInformationFromDB(String setID, String columnInput)
@@ -270,18 +270,16 @@ namespace BrickLinkBrickSet
             string setInformation;
             string setMinifigureCollection = "";
             int minifigCountValue = 0;
-            string typeOfRequest = "";
+            string typeOfRequest = "info";
             string URL = "";
 
             switch (attribute)
             {
                 case dbNumOfMinifigsAttribute:
-                    typeOfRequest = "info";
                     URL = "/subsets";
                     break;
 
-                case dbSetMinifiguresAttribute:
-                    typeOfRequest = "info";
+                case dbSetMinifiguresAttribute:                    
                     URL = "/subsets";
                     break;
 
@@ -313,8 +311,7 @@ namespace BrickLinkBrickSet
             if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
             {
                 setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", typeOfRequest);
-            }
-            
+            }            
 
             JObject setObj = JObject.Parse(setInformation);
             if (!setObj.ToString().Contains("TIMESTAMP"))
@@ -345,6 +342,23 @@ namespace BrickLinkBrickSet
                                 setMinifigureCollection += minifigure + " (" + minifigCountValue.ToString() + "), ";
                             }
                             setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
+                        }
+                    } else if (attribute == dbCategoryIDAttribute)
+                    {
+                        string SetCategory = (string)setObj["data"]["category_id"] ?? "N/A";
+                        if (SetCategory != "N/A")
+                        {
+                            var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
+                            if (!catObj.ToString().Contains("TIMESTAMP"))
+                            {
+                                setData = (string)catObj["data"]["category_name"] ?? "N /A";
+                            }
+                            else
+                            {
+                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                Thread.Sleep(500);
+                                return GetSetCategoryFromBrickLink(setID);
+                            }
                         }
                     }
                     else
@@ -606,23 +620,13 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (SetCategoryFromDB != "N/A" || SetCategoryFromDB != "" || SetCategoryFromDB == "no results")
+                    if (SetCategoryFromDB == "N/A" || SetCategoryFromDB == "" || SetCategoryFromDB == "no results")
                     {
-                        return SetCategoryFromDB;
+                        callDB = true; 
                     }
                     else
                     {
-                        var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
-                        if (!catObj.ToString().Contains("TIMESTAMP"))
-                        {
-                            callDB = true;
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetCategoryFromBrickLink(setID);
-                        }
+                        return SetCategoryFromDB;
                     }
                 }
                 if (callDB)
