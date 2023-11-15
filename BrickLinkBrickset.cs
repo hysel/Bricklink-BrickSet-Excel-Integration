@@ -270,49 +270,69 @@ namespace BrickLinkBrickSet
             string setInformation;
             string setMinifigureCollection = "";
             int minifigCountValue = 0;
+            string typeOfRequest = "";
+            string URL = "";
 
-            if (attribute == dbNumOfMinifigsAttribute || attribute == dbSetMinifiguresAttribute)
+            switch (attribute)
             {
-                setInformation = GetSetInformation(brickLinkSetURL + setID + "-1/subsets", "info");
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkSetURL + setID + "/subsets", "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkGearURL + setID + "/subsets", "info");
-                }
-                // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID + "/subsets", "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkPartURL + setID + "/subsets", "info");
-                }
-                // 5-21-2023 Added this section to deal with old booklets
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", "info");
-                }
+                case dbNumOfMinifigsAttribute:
+                    typeOfRequest = "info";
+                    URL = "/subsets";
+                    break;
 
-                JObject setObj = JObject.Parse(setInformation);
-                if (!setObj.ToString().Contains("TIMESTAMP"))
+                case dbSetMinifiguresAttribute:
+                    typeOfRequest = "info";
+                    URL = "/subsets";
+                    break;
+
+                case dbAvgPriceAttribute:
+                    typeOfRequest = "price";                    
+                    break;
+            }
+            
+            setInformation = GetSetInformation(brickLinkSetURL + setID + "-1" + URL, typeOfRequest);
+
+            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            {
+                setInformation = GetSetInformation(brickLinkSetURL + setID + URL, typeOfRequest);
+            }
+            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            {
+                setInformation = GetSetInformation(brickLinkGearURL + setID + URL, typeOfRequest);
+            }
+            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            {
+                setInformation = GetSetInformation(brickLinkMiniFigURL + setID + URL, typeOfRequest);
+            }
+            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            {
+                setInformation = GetSetInformation(brickLinkPartURL + setID + URL, typeOfRequest);
+            }
+            // 5-21-2023 Added this section to deal with old booklets
+            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            {
+                setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", typeOfRequest);
+            }
+            
+
+            JObject setObj = JObject.Parse(setInformation);
+            if (!setObj.ToString().Contains("TIMESTAMP"))
+            {
+                if (setObj.ContainsKey("data"))
                 {
-                    if (setObj.ContainsKey("data"))
+                    if (attribute == dbNumOfMinifigsAttribute)
                     {
-                        if (attribute == dbNumOfMinifigsAttribute)
-                        {
-                            IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
+                        IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
 
-                            foreach (JToken part in partsonly)
-                            {
-                                setMiniFigNum += (int)part;
-                            }
-                            setData = setMiniFigNum.ToString();
+                        foreach (JToken part in partsonly)
+                        {
+                            setMiniFigNum += (int)part;
                         }
-                        else
+                        setData = setMiniFigNum.ToString();
+                    }
+                    else if (attribute == dbSetMinifiguresAttribute)
+                    {
                         {
                             IEnumerable<JToken> minifiguresSet = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].item.no");
                             foreach (JToken minifigure in minifiguresSet)
@@ -327,61 +347,20 @@ namespace BrickLinkBrickSet
                             setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
                         }
                     }
-                    return setData;
-                }
-                else
-                {
-                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                    Thread.Sleep(500);
-                    return GetSetInformationFromBrickLink(setID, attribute);
-                }
-            }
-            else
-            {
-                setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                }
-                // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                }
-                // 5-21-2023 Added this section to deal with old booklets
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
-                }
-                JObject setObj = JObject.Parse(setInformation);
-                if (!setObj.ToString().Contains("TIMESTAMP"))
-                {
-                    if (setObj.ContainsKey("data"))
+                    else
                     {
-                        setData = (string)setObj["data"][attribute];
+                        setData = (string)setObj["data"][attribute] ?? "N/A";
                     }
-                    if (setData == null)
-                    {
-                        return "no results";
-                    }
-                }
-                else
-                {
-                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                    Thread.Sleep(500);
-                    return GetSetInformationFromBrickLink(setID, attribute);
                 }
                 return setData;
             }
-        }
+            else
+            {
+                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                Thread.Sleep(500);
+                return GetSetInformationFromBrickLink(setID, attribute);
+            }
+        }    
 
         //This function will return the item name 
         public static string GetSetNameFromBrickLink(string setID)
@@ -393,7 +372,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setNameFromDB == "N/A" || setNameFromDB == "")
+                    if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
                     {
                         callDB = true;                        
                     }
@@ -422,7 +401,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setNumberOfMinifiguresFromDB == "N/A" || setNumberOfMinifiguresFromDB == "")
+                    if (setNumberOfMinifiguresFromDB == "N/A" || setNumberOfMinifiguresFromDB == "" || setNumberOfMinifiguresFromDB == "no results")
                     {
                         callDB = true;
                     }
@@ -451,7 +430,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setMiniFigCollectionFromDB == "N/A" || setMiniFigCollectionFromDB == "")
+                    if (setMiniFigCollectionFromDB == "N/A" || setMiniFigCollectionFromDB == "" || setMiniFigCollectionFromDB == "no results")
                     {
                         callDB = true;
                     }
@@ -480,7 +459,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setThumbnailFromDB == "N/A" || setThumbnailFromDB == "")
+                    if (setThumbnailFromDB == "N/A" || setThumbnailFromDB == "" || setThumbnailFromDB == "no results")
                     {
                         callDB = true;                        
                     }
@@ -510,7 +489,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setImageFromDB == "N/A" || setImageFromDB == "")
+                    if (setImageFromDB == "N/A" || setImageFromDB == "" || setImageFromDB == "no results")
                     {
                         callDB = true;                        
                     }
@@ -539,7 +518,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setYearFromDB == "N/A" || setYearFromDB == "")
+                    if (setYearFromDB == "N/A" || setYearFromDB == "" || setYearFromDB == "no results")
                     {
                         callDB = true;
                     }
@@ -568,7 +547,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (SetTypeFromDB == "N/A" || SetTypeFromDB == "")
+                    if (SetTypeFromDB == "N/A" || SetTypeFromDB == "" || SetTypeFromDB == "no results")
                     {
                         callDB = true;
                     }
@@ -597,7 +576,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (SetAvgPriceFromDB == "N/A" || SetAvgPriceFromDB == "")
+                    if (SetAvgPriceFromDB == "N/A" || SetAvgPriceFromDB == "" || SetAvgPriceFromDB == "no results") 
                     {
                         callDB = true;
                     }
@@ -627,7 +606,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (SetCategoryFromDB != "N/A" || SetCategoryFromDB != "")
+                    if (SetCategoryFromDB != "N/A" || SetCategoryFromDB != "" || SetCategoryFromDB == "no results")
                     {
                         return SetCategoryFromDB;
                     }
@@ -671,74 +650,74 @@ namespace BrickLinkBrickSet
                 SqlConnection setCacheConnection = new SqlConnection(connectionString);
                 setCacheConnection.Open();
 
-                if (cacheReader != setID)
+                string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
                 {
-                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                    setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
+                }
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
+                }
+                // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
+                }
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
+                }
+                // 5-21-2023 Added this section to deal with old booklets
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
+                }
+
+                var setObj = JObject.Parse(setInformation);
+                if (!setObj.ToString().Contains("TIMESTAMP"))
+                {
+                    // get set information
+                    string setName = (string)setObj["data"]["name"] ?? "N/A";
+                    string setType = (string)setObj["data"]["type"] ?? "N/A";
+                    string setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
+                    string setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
+                    string setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
+
+                    // Get set price
+                    string setAVGPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
+
+                    // get set category
+                    string setCategory_id = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
+
+                    // get set number of parts from brickset
+                    string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
+                    if (setPartNum == "BrickSet API limit exceeded")
+                        setPartNum = "0";
+
+                    // get set number of minifigures
+                    string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
+
+                    // get set UPC
+                    string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
+                    if (setUPC == "BrickSet API limit exceeded")
+                        setUPC = "0";
+
+                    // get set description
+                    string setDescription = GetSetAttributeFromBrickSet(setID, brickSetDescriptionAttribute);
+                    if (setDescription == "BrickSet API limit exceeded")
+                        setDescription = "";
+
+                    // get set orignal retail price
+                    string setOriginalPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + "US");
+                    if (setOriginalPrice == "BrickSet API limit exceeded")
+                        setOriginalPrice = "";
+
+                    // get set minifigure collection
+                    string setMinifiguresCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
+
+                    if (cacheReader != setID)
                     {
-                        setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                    }
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                    }
-                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                    }
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                    }
-                    // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
-                    }
-
-                    var setObj = JObject.Parse(setInformation);
-                    if (!setObj.ToString().Contains("TIMESTAMP"))
-                    {
-                        // get set information
-                        string setName = (string)setObj["data"]["name"] ?? "N/A";
-                        string setType = (string)setObj["data"]["type"] ?? "N/A";
-                        string setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
-                        string setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
-                        string setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
-
-                        // Get set price
-                        string setAVGPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
-
-                        // get set category
-                        string setCategory_id = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
-
-                        // get set number of parts from brickset
-                        string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
-                        if (setPartNum == "BrickSet API limit exceeded")
-                            setPartNum = "0";   
-
-                        // get set number of minifigures
-                        string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
-
-                        // get set UPC
-                        string setUPC = GetSetAttributeFromBrickSet(setID, dbUPCAttribute);
-                        if (setUPC == "BrickSet API limit exceeded")
-                            setUPC = "0";
-
-                        // get set description
-                        string setDescription = GetSetAttributeFromBrickSet(setID, dbDescriptoinAttribute);
-                        if (setDescription == "BrickSet API limit exceeded")
-                            setDescription = "";
-
-                        // get set orignal retail price
-                        string setOriginalPrice = GetSetAttributeFromBrickSet(setID, dbOrgPriceAttribute+"US");
-                        if (setOriginalPrice == "BrickSet API limit exceeded")
-                            setOriginalPrice = "";
-
-                        // get set minifigure collection
-                        string setMinifiguresCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
-
                         string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated,partnum,minifignum,UPC,description,original_price,minifigset) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated,@partnum,@minifignum,@UPC,@description,@original_price,@minifigset)";
                         SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
                         insertCommand.Parameters.AddWithValue("@ID", setID);
@@ -764,130 +743,48 @@ namespace BrickLinkBrickSet
                         {
                             setCacheConnection.Close();
                             return "There was an error inserting the values to the DB";
-                        } 
-                        else
-                        {
-                            return "Entry was added to the DB";
                         }
+                        return "Entry was added to the DB";
                     }
                     else
                     {
-                        // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                        Thread.Sleep(500);
-                        return updateSetInCache(setID, dbColumn);
+                        if (setName != "N/A")
+                        {
+                            string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum,UPC=@UPC,description=@description,original_price=@original_price,minifigset=@minifigset where ID=@ID";
+                            SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
+                            updateCommand.Parameters.AddWithValue("@ID", setID);
+                            updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
+                            updateCommand.Parameters.AddWithValue("@type", setType);
+                            updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(setCategory_id));
+                            updateCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                            updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
+                            updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
+                            updateCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
+                            updateCommand.Parameters.AddWithValue("@date_updated", today);
+                            updateCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
+                            updateCommand.Parameters.AddWithValue("@minifignum", int.Parse(setMinifigureNum));
+                            updateCommand.Parameters.AddWithValue("@UPC", setUPC);
+                            updateCommand.Parameters.AddWithValue("@description", setDescription);
+                            updateCommand.Parameters.AddWithValue("@original_price", setOriginalPrice);
+                            updateCommand.Parameters.AddWithValue("@minifigset", setMinifiguresCollection);
+                            int result = updateCommand.ExecuteNonQuery();
+
+                            // check for errors
+                            if (result < 0)
+                            {
+                                setCacheConnection.Close();
+                                return "There was an error updating the values to the DB";
+                            }
+                        }
+                        return "DB Record updated";
                     }
                 }
                 else
                 {
-                    string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                    }
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                    }
-                    // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                    }
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                    }
-                    // 5-21-2023 Added this section to deal with old booklets
-                    if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    {
-                        setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
-                    }
-                    // get set information
-                    var setObj = JObject.Parse(setInformation);
-                    if (!setObj.ToString().Contains("TIMESTAMP"))
-                    {
-                        if (setObj.ContainsKey("data"))
-                        {
-                            string setName = (string)setObj["data"]["name"] ?? "N/A";
-                            string setType = (string)setObj["data"]["type"] ?? "N/A";
-                            string setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
-                            string setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
-                            string setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
-
-                            // Get set price
-                            string setAVGPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
-
-                            // get set category
-                            string setCategory_id = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
-
-                            // get set number of parts from brickset
-                            string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
-                            if (setPartNum == "BrickSet API limit exceeded")
-                                setPartNum = "0";
-
-                            // get set number of minifigures
-                            string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
-
-                            // get set UPC
-                            string setUPC = GetSetAttributeFromBrickSet(setID, dbUPCAttribute);
-                            if (setUPC == "BrickSet API limit exceeded")
-                                setUPC = "0";
-
-                            // get set description
-                            string setDescription = GetSetAttributeFromBrickSet(setID, dbDescriptoinAttribute);
-                            if (setDescription == "BrickSet API limit exceeded")
-                                setDescription = "";
-
-                            // get set orignal retail price
-                            string setOriginalPrice = GetSetAttributeFromBrickSet(setID, dbOrgPriceAttribute + "US");
-                            if (setOriginalPrice == "BrickSet API limit exceeded")
-                                setOriginalPrice = "";
-
-                            // get set minifigure collection
-                            string setMinifiguresCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
-
-                            if (setName != "N/A")
-                            {
-                                string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum,UPC=@UPC,description=@description,original_price=@original_price,minifigset=@minifigset where ID=@ID";
-                                SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
-                                updateCommand.Parameters.AddWithValue("@ID", setID);
-                                updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
-                                updateCommand.Parameters.AddWithValue("@type", setType);
-                                updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(setCategory_id));
-                                updateCommand.Parameters.AddWithValue("@imageURL", setImageURL);
-                                updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                                updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                                updateCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
-                                updateCommand.Parameters.AddWithValue("@date_updated", today);
-                                updateCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
-                                updateCommand.Parameters.AddWithValue("@minifignum", int.Parse(setMinifigureNum));
-                                updateCommand.Parameters.AddWithValue("@UPC", setUPC);
-                                updateCommand.Parameters.AddWithValue("@description", setDescription);
-                                updateCommand.Parameters.AddWithValue("@original_price", setOriginalPrice);
-                                updateCommand.Parameters.AddWithValue("@minifigset", setMinifiguresCollection);
-                                int result = updateCommand.ExecuteNonQuery();
-
-                                // check for errors
-                                if (result < 0)
-                                {
-                                    setCacheConnection.Close();
-                                    return "There was an error updating the values to the DB";
-                                }
-                                else
-                                {
-                                    return "DB Record updated";
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                            Thread.Sleep(500);
-                            return GetSetCategoryFromBrickLink(setID);
-                        }
-                    }
+                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                    Thread.Sleep(500);
+                    return updateSetInCache(setID, dbColumn);
                 }
-                return cacheReader.ToString();
             }
             catch (Exception ex)
             {
@@ -948,7 +845,7 @@ namespace BrickLinkBrickSet
                 {
                     //reading stream    
                     ServiceResult = rd.ReadToEnd();
-                }
+                }                
                 return ServiceResult;
             }
             catch (Exception ex)
@@ -976,6 +873,8 @@ namespace BrickLinkBrickSet
                     else if (attribute == brickSetUPCAttribute)
                     {
                         setInformation = (string)setObj["sets"][0]["barcode"][attribute] ?? "N/A";
+                        if (setInformation == "N/A")
+                            setInformation = (string)setObj["sets"][0]["barcode"]["EAN"] ?? "N/A";
                     }
                     else if (attribute == brickSetDescriptionAttribute)
                     {
@@ -1013,7 +912,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setNameFromDB == "N/A" || setNameFromDB == "")
+                    if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1053,7 +952,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "")
+                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1093,7 +992,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setImageURLFromDB == "N/A" || setImageURLFromDB == "")
+                    if (setImageURLFromDB == "N/A" || setImageURLFromDB == "" || setImageURLFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1133,7 +1032,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "")
+                    if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "" || setThumbnailURLFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1173,7 +1072,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "")
+                    if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "" || setReleaseYearFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1213,7 +1112,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "")
+                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1253,7 +1152,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (setUPCFromDB == "N/A" || setUPCFromDB == "")
+                    if (setUPCFromDB == "N/A" || setUPCFromDB == "" || setUPCFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1293,7 +1192,7 @@ namespace BrickLinkBrickSet
                 Boolean callDB = false;
                 while (!callDB)
                 {
-                    if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "")
+                    if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "" || SetDescriptionFromDB == "no results")
                     {
                         if (setID == "BrickSet API limit exceeded")
                         {
@@ -1335,7 +1234,7 @@ namespace BrickLinkBrickSet
                     Boolean callDB = false;
                     while (!callDB)
                     {
-                        if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "")
+                        if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
                         {
                             if (setID == "BrickSet API limit exceeded")
                             {
