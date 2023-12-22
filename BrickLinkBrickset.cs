@@ -341,11 +341,8 @@ namespace BrickLinkBrickSet
                                 }
                                 setMinifigureCollection += minifigure + " (" + minifigCountValue.ToString() + "), ";
                             }
-<<<<<<< HEAD
-                            if (setMinifigureCollection.Length > 0)
-=======
+
                             if (setMinifigureCollection.Length > 0)   
->>>>>>> 2021b645a2a7f9804cd7c59a5a3723526ad6e513
                                 setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
                         }
                     }
