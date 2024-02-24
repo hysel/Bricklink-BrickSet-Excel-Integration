@@ -1,5 +1,5 @@
 # Bricklink/BrickSet Excel Integration
-This project aims to assist you in accessing information from LEGO sets, including Minifigures and other items, using Excel functions and data storage in an Excel spreadsheet. The code can retrieve the name, release year, and average price for new items directly from the BrickLink or BricketSet APIs. I have been working on this project for more than two years, and since I am not a developer, I would like to invite you to improve this solution by introducing additional features beyond the current scope.
+This project aims to assist you in accessing information from LEGO sets, including Minifigures and other items, using Excel functions and data storage in an Excel spreadsheet. The code can retrieve the name, release year, and average price for new items directly from the BrickLink or BricketSet APIs. I have been working on this project for more than two years, and since I am not a developer, I invite you to improve this solution by introducing additional features beyond the current scope.
 
 **Prerequisites:**
 
@@ -7,7 +7,7 @@ This project aims to assist you in accessing information from LEGO sets, includi
 1) Install Visual Studio 2022 https://visualstudio.microsoft.com/downloads/
 2) Install SQL Server (needed for reporting) https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 3) Install SQL Server Management Studio (SSMS) https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16#download-ssms
-4) Follow this link to ensure TLS 1.2 is enabled on your machine.
+4) Follow this https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c to ensure TLS 1.2 is enabled on your machine.
 
 **Loading the Code:**
 1) Launch Visual Studio
