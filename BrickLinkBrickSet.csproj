@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>BrickLinkBrickSet</RootNamespace>
     <AssemblyName>BrickLink and BrickSet API to Excel</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>

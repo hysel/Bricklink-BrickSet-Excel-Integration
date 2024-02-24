@@ -86,7 +86,7 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string dbResults = "N/A"; 
+                string dbResults = "N/A";
                 string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets=true";
                 SqlConnection dbSetConnection = new(connectionString);
                 dbSetConnection.Open();
@@ -99,7 +99,7 @@ namespace BrickLinkBrickSet
                     while (dbSetReader.Read())
                     {
                         dbResults = Convert.ToString(dbSetReader[columnInput]);
-                    }                 
+                    }
                 }
                 dbSetConnection.Close();
                 return dbResults;
@@ -365,8 +365,8 @@ namespace BrickLinkBrickSet
                             }
                         }
                         else
-                        {                            
-                          setData = (string)setObj["data"][attribute];                            
+                        {
+                            setData = (string)setObj["data"][attribute];
                         }
                     }
                     return setData;
@@ -923,7 +923,7 @@ namespace BrickLinkBrickSet
                 {
                     //reading stream    
                     ServiceResult = rd.ReadToEnd();
-                }                
+                }
                 return ServiceResult;
             }
             catch (Exception ex)
@@ -968,7 +968,7 @@ namespace BrickLinkBrickSet
                         else
                         {
                             setInformation = (string)setObj["sets"][0][attribute] ?? "N/A";
-                        }                        
+                        }
                     }
                     return setInformation;
                 }
@@ -1369,35 +1369,36 @@ namespace BrickLinkBrickSet
                     string setOrgPriceFromDB = ReadSetInformationFromDB(setID, dbOrgPriceAttribute);
                     string setOrgPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + country);
                     Boolean callDB = false;
-                    if (setOrgPrice != null) { 
-                    while (!callDB)
+                    if (setOrgPrice != null)
                     {
-                        if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
+                        while (!callDB)
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
                             {
-                                return setOrgPrice;
-                            }
-                            else if (setOrgPrice != setOrgPriceFromDB)
-                            {
-                                callDB = true;
+                                if (setID == "BrickSet API limit exceeded")
+                                {
+                                    return setOrgPrice;
+                                }
+                                else if (setOrgPrice != setOrgPriceFromDB)
+                                {
+                                    callDB = true;
+                                }
+                                else
+                                {
+                                    return setOrgPrice;
+                                }
                             }
                             else
                             {
                                 return setOrgPrice;
                             }
                         }
-                        else
-                        {
-                            return setOrgPrice;
-                        }
+                        if (callDB)
+                            updateSetInCache(setID, dbOrgPriceAttribute);
+                        return GetSetOriginalPriceFromBrickSet(setID, country);
                     }
-                    if (callDB)
-                        updateSetInCache(setID, dbOrgPriceAttribute);
-                    return GetSetOriginalPriceFromBrickSet(setID, country);
-                }
-                else
-                    return "Wrong country code entered, accetable values are: US, UK, CA and DE";
+                    else
+                        return "Wrong country code entered, accetable values are: US, UK, CA and DE";
                 }
                 else
                 {
@@ -1412,6 +1413,6 @@ namespace BrickLinkBrickSet
 
         public static void Main()
         {
-        }            
+        }
     }
 }
