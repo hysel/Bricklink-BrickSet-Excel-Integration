@@ -803,6 +803,8 @@ namespace BrickLinkBrickSet
 
                     // get set number of minifigures
                     string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
+                    if (setMinifigureNum == "") 
+                       setMinifigureNum = "0";
 
                     // get set UPC
                     string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
