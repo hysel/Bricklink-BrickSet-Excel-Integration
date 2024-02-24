@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[Sets](
 	[name] [nvarchar](max) NULL,
 	[type] [nvarchar](max) NULL,
 	[categoryID] [nvarchar](max) NULL,
-	[imageURL] [nvarchar](max) NULL,
+	[image_url] [nvarchar](max) NULL,
 	[thumbnail_url] [nvarchar](max) NULL,
 	[year_released] [nvarchar](max) NULL,
 	[avg_price] [nvarchar](max) NULL,

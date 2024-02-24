@@ -43,9 +43,9 @@ namespace BrickLinkBrickSet
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v2/items/minifig/";     // BrickLink API Minifig URL
         const string brickLinkPartURL = "https://api.bricklink.com/api/store/v2/items/part/";           // BrickLink API Part URL
         const string brickLinkBooksURL = "https://api.bricklink.com/api/store/v2/items/book/";          // BrickLink API Book URL
-        const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";       // BrickLink API Book URL        
+        const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v2/categories/";       // BrickLink API Book URL                
 
-        // BrickSet
+        // BrickSet     
         const string brickSetApiKey = "";                                       // Brickset API Key
         const string bricksHash = "";                                           // Brickset Hash        
         const string brickSetSOAPUrl = "https://brickset.com/api/v3.asmx";      // Brickset URL
@@ -53,7 +53,7 @@ namespace BrickLinkBrickSet
         const string brickSetNameAttribute = "name";                            // Bricket set name attribute
         const string brickSetYearAttribute = "year";                            // Bricket set release year attribute
         const string brickSetThemeAttribute = "theme";                          // Bricket set theme attribute
-        const string brickSetImageURLAttribute = "imageURL";                    // Bricket set image attribute
+        const string brickSetImageURLAttribute = "image_url";                    // Bricket set image attribute
         const string brickSetThumbnailURLAttribute = "thumbnailURL";            // Bricket set thumbnail attribute
         const string brickSetOriginalSellPriceAttribute = "retailPrice";        // Bricket set original sell price attribute
         const string brickSetUPCAttribute = "UPC";                              // Bricket set UPC attribute 
@@ -70,7 +70,7 @@ namespace BrickLinkBrickSet
         const string dbNameAttribute = "name";                  // The DB column that holds the set name        
         const string dbTypeAttribute = "type";                  // The DB column that holds the set name        
         const string dbCategoryIDAttribute = "categoryID";      // The DB column that holds the set category  
-        const string dbImageURLAttribute = "imageURL";          // The DB column that holds the set image URL 
+        const string dbImageURLAttribute = "image_url";         // The DB column that holds the set image URL 
         const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB column that holds the set thumbnail URL 
         const string dbYearAttribute = "year_released";         // The DB column that holds the set release year  
         const string dbAvgPriceAttribute = "avg_price";         // The DB column that holds the set average price year (BrickLink only)
@@ -803,6 +803,8 @@ namespace BrickLinkBrickSet
 
                     // get set number of minifigures
                     string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
+                    if (setMinifigureNum == "") 
+                        setMinifigureNum = "0";
 
                     // get set UPC
                     string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
@@ -824,13 +826,13 @@ namespace BrickLinkBrickSet
 
                     if (cacheReader != setID)
                     {
-                        string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,imageURL,thumbnail_url,year_released,avg_price,date_updated,partnum,minifignum,UPC,description,original_price,minifigset) VALUES (@ID,@name,@type,@categoryID,@imageURL,@thumbnail_url,@year_released,@avg_price,@date_updated,@partnum,@minifignum,@UPC,@description,@original_price,@minifigset)";
+                        string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,image_url,thumbnail_url,year_released,avg_price,date_updated,partnum,minifignum,UPC,description,original_price,minifigset) VALUES (@ID,@name,@type,@categoryID,@image_url,@thumbnail_url,@year_released,@avg_price,@date_updated,@partnum,@minifignum,@UPC,@description,@original_price,@minifigset)";
                         SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
                         insertCommand.Parameters.AddWithValue("@ID", setID);
                         insertCommand.Parameters.AddWithValue("@name", WebUtility.HtmlDecode(setName));
                         insertCommand.Parameters.AddWithValue("@type", setType);
                         insertCommand.Parameters.AddWithValue("@categoryID", WebUtility.HtmlDecode(setCategory_id));
-                        insertCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                        insertCommand.Parameters.AddWithValue("@image_url", setImageURL);
                         insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
                         insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
                         insertCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
@@ -857,13 +859,13 @@ namespace BrickLinkBrickSet
                     {
                         if (setName != "N/A")
                         {
-                            string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,imageURL=@imageURL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum,UPC=@UPC,description=@description,original_price=@original_price,minifigset=@minifigset where ID=@ID";
+                            string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,image_url=@image_url,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum,UPC=@UPC,description=@description,original_price=@original_price,minifigset=@minifigset where ID=@ID";
                             SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
                             updateCommand.Parameters.AddWithValue("@ID", setID);
                             updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
                             updateCommand.Parameters.AddWithValue("@type", setType);
                             updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(setCategory_id));
-                            updateCommand.Parameters.AddWithValue("@imageURL", setImageURL);
+                            updateCommand.Parameters.AddWithValue("@image_url", setImageURL);
                             updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
                             updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
                             updateCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
@@ -1108,7 +1110,7 @@ namespace BrickLinkBrickSet
         }
 
         //This function will return the item image URL 
-        public static string GetSetImageURLFromBrickSet(string setID)
+        public static string GetSetimageurlFromBrickSet(string setID)
         {
             try
             {
