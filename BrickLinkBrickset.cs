@@ -86,8 +86,8 @@ namespace BrickLinkBrickSet
         {
             try
             {
-                string dbResults = "N/A";
-                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
+                string dbResults = "N/A"; 
+                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets=true";
                 SqlConnection dbSetConnection = new(connectionString);
                 dbSetConnection.Open();
                 String sql = "SELECT " + columnInput + " FROM [dbo].Sets where ID='" + setID + "'";
@@ -99,10 +99,9 @@ namespace BrickLinkBrickSet
                     while (dbSetReader.Read())
                     {
                         dbResults = Convert.ToString(dbSetReader[columnInput]);
-                    }
-                    dbSetConnection.Close();
-                    dbSetConnection.Close();
+                    }                 
                 }
+                dbSetConnection.Close();
                 return dbResults;
             }
             catch (Exception ex)
@@ -265,116 +264,125 @@ namespace BrickLinkBrickSet
 
         private static string GetSetInformationFromBrickLink(string setID, string attribute)
         {
-            int setMiniFigNum = 0;
-            string setData = "";
-            string setInformation;
-            string setMinifigureCollection = "";
-            int minifigCountValue = 0;
-            string typeOfRequest = "info";
-            string URL = "";
+            try
+            {
+                int setMiniFigNum = 0;
+                string setData = "";
+                string setInformation;
+                string setMinifigureCollection = "";
+                int minifigCountValue = 0;
+                string typeOfRequest = "info";
+                string URL = "";
 
-            switch (attribute)
-            {
-                case dbNumOfMinifigsAttribute:
-                    URL = "/subsets";
-                    break;
-
-                case dbSetMinifiguresAttribute:                    
-                    URL = "/subsets";
-                    break;
-
-                case dbAvgPriceAttribute:
-                    typeOfRequest = "price";                    
-                    break;
-            }
-            
-            setInformation = GetSetInformation(brickLinkSetURL + setID + "-1" + URL, typeOfRequest);
-
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkSetURL + setID + URL, typeOfRequest);
-            }
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkGearURL + setID + URL, typeOfRequest);
-            }
-            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkMiniFigURL + setID + URL, typeOfRequest);
-            }
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkPartURL + setID + URL, typeOfRequest);
-            }
-            // 5-21-2023 Added this section to deal with old booklets
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", typeOfRequest);
-            }            
-
-            JObject setObj = JObject.Parse(setInformation);
-            if (!setObj.ToString().Contains("TIMESTAMP"))
-            {
-                if (setObj.ContainsKey("data"))
+                switch (attribute)
                 {
-                    if (attribute == dbNumOfMinifigsAttribute)
-                    {
-                        IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
+                    case dbNumOfMinifigsAttribute:
+                        URL = "/subsets";
+                        break;
 
-                        foreach (JToken part in partsonly)
-                        {
-                            setMiniFigNum += (int)part;
-                        }
-                        setData = setMiniFigNum.ToString();
-                    }
-                    else if (attribute == dbSetMinifiguresAttribute)
-                    {
-                        {
-                            IEnumerable<JToken> minifiguresSet = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].item.no");
-                            foreach (JToken minifigure in minifiguresSet)
-                            {
-                                IEnumerable<JToken> minifigureData = setObj.SelectTokens("$..entries[?(@..no == '" + minifigure + "')].quantity");
-                                foreach (JToken minifigureCount in minifigureData)
-                                {
-                                    minifigCountValue = (int)minifigureCount;
-                                }
-                                setMinifigureCollection += minifigure + " (" + minifigCountValue.ToString() + "), ";
-                            }
-                            setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
-                        }
-                    } else if (attribute == dbCategoryIDAttribute)
-                    {
-                        string SetCategory = (string)setObj["data"]["category_id"] ?? "N/A";
-                        if (SetCategory != "N/A")
-                        {
-                            var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
-                            if (!catObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                setData = (string)catObj["data"]["category_name"] ?? "N /A";
-                            }
-                            else
-                            {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return GetSetCategoryFromBrickLink(setID);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        setData = (string)setObj["data"][attribute] ?? "N/A";
-                    }
+                    case dbSetMinifiguresAttribute:
+                        URL = "/subsets";
+                        break;
+
+                    case dbAvgPriceAttribute:
+                        typeOfRequest = "price";
+                        break;
                 }
-                return setData;
+
+                setInformation = GetSetInformation(brickLinkSetURL + setID + "-1" + URL, typeOfRequest);
+
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkSetURL + setID + URL, typeOfRequest);
+                }
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkGearURL + setID + URL, typeOfRequest);
+                }
+                // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID + URL, typeOfRequest);
+                }
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkPartURL + setID + URL, typeOfRequest);
+                }
+                // 5-21-2023 Added this section to deal with old booklets
+                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+                {
+                    setInformation = GetSetInformation(brickLinkBooksURL + setID + "/subsets", typeOfRequest);
+                }
+
+                JObject setObj = JObject.Parse(setInformation);
+                if (!setObj.ToString().Contains("TIMESTAMP"))
+                {
+                    if (setObj.ContainsKey("data") && setObj["data"].HasValues)
+                    {
+                        if (attribute == dbNumOfMinifigsAttribute)
+                        {
+                            IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
+
+                            foreach (JToken part in partsonly)
+                            {
+                                setMiniFigNum += (int)part;
+                            }
+                            setData = setMiniFigNum.ToString();
+                        }
+                        else if (attribute == dbSetMinifiguresAttribute)
+                        {
+                            {
+                                IEnumerable<JToken> minifiguresSet = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].item.no");
+                                foreach (JToken minifigure in minifiguresSet)
+                                {
+                                    IEnumerable<JToken> minifigureData = setObj.SelectTokens("$..entries[?(@..no == '" + minifigure + "')].quantity");
+                                    foreach (JToken minifigureCount in minifigureData)
+                                    {
+                                        minifigCountValue = (int)minifigureCount;
+                                    }
+                                    setMinifigureCollection += minifigure + " (" + minifigCountValue.ToString() + "), ";
+                                }
+                                if (setMinifigureCollection != "")
+                                    setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
+                            }
+                        }
+                        else if (attribute == dbCategoryIDAttribute)
+                        {
+                            string SetCategory = (string)setObj["data"]["category_id"] ?? "N/A";
+                            if (SetCategory != "N/A")
+                            {
+                                var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
+                                if (!catObj.ToString().Contains("TIMESTAMP"))
+                                {
+                                    setData = (string)catObj["data"]["category_name"] ?? "N /A";
+                                }
+                                else
+                                {
+                                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                                    Thread.Sleep(500);
+                                    return GetSetCategoryFromBrickLink(setID);
+                                }
+                            }
+                        }
+                        else
+                        {                            
+                          setData = (string)setObj["data"][attribute];                            
+                        }
+                    }
+                    return setData;
+                }
+                else
+                {
+                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
+                    Thread.Sleep(500);
+                    return GetSetInformationFromBrickLink(setID, attribute);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                Thread.Sleep(500);
-                return GetSetInformationFromBrickLink(setID, attribute);
+                return ex.Message.ToString();
             }
-        }    
+        }
 
         //This function will return the item name 
         public static string GetSetNameFromBrickLink(string setID)
@@ -384,20 +392,27 @@ namespace BrickLinkBrickSet
                 string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
                 string setName = GetSetInformationFromBrickLink(setID, dbNameAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setName != "")
                 {
-                    if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;                        
+                        if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setNameFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setNameFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbNameAttribute);
+                    return GetSetNameFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbNameAttribute);
-                return GetSetNameFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -413,20 +428,27 @@ namespace BrickLinkBrickSet
                 string setNumberOfMinifiguresFromDB = ReadSetInformationFromDB(setID, dbNumOfMinifigsAttribute);
                 string setNumberOfMinifigures = setNumberOfMinifigures = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setNumberOfMinifigures != "")
                 {
-                    if (setNumberOfMinifiguresFromDB == "N/A" || setNumberOfMinifiguresFromDB == "" || setNumberOfMinifiguresFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;
+                        if (setNumberOfMinifiguresFromDB == "N/A" || setNumberOfMinifiguresFromDB == "" || setNumberOfMinifiguresFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setNumberOfMinifiguresFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setNumberOfMinifiguresFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbSetMinifiguresAttribute);
+                    return GetSetMiniFigNumberFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbSetMinifiguresAttribute);
-                return GetSetMiniFigNumberFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -442,20 +464,27 @@ namespace BrickLinkBrickSet
                 string setMiniFigCollectionFromDB = ReadSetInformationFromDB(setID, dbSetMinifiguresAttribute);
                 string SetMiniFigCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetMiniFigCollection != "")
                 {
-                    if (setMiniFigCollectionFromDB == "N/A" || setMiniFigCollectionFromDB == "" || setMiniFigCollectionFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;
+                        if (setMiniFigCollectionFromDB == "N/A" || setMiniFigCollectionFromDB == "" || setMiniFigCollectionFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setMiniFigCollectionFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setMiniFigCollectionFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbSetMinifiguresAttribute);
+                    return GetSetMiniFigCollectionFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbSetMinifiguresAttribute);
-                return GetSetMiniFigCollectionFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -471,20 +500,27 @@ namespace BrickLinkBrickSet
                 string setThumbnailFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
                 string SetThumbnail = GetSetInformationFromBrickLink(setID, dbThumbnailURLAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetThumbnail != "")
                 {
-                    if (setThumbnailFromDB == "N/A" || setThumbnailFromDB == "" || setThumbnailFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;                        
+                        if (setThumbnailFromDB == "N/A" || setThumbnailFromDB == "" || setThumbnailFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setThumbnailFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setThumbnailFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbThumbnailURLAttribute);
+                    return GetSetThumbnailFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbThumbnailURLAttribute);
-                return GetSetThumbnailFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
 
             }
             catch (Exception ex)
@@ -501,20 +537,27 @@ namespace BrickLinkBrickSet
                 string setImageFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
                 string SetImage = GetSetInformationFromBrickLink(setID, dbImageURLAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetImage != "")
                 {
-                    if (setImageFromDB == "N/A" || setImageFromDB == "" || setImageFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;                        
+                        if (setImageFromDB == "N/A" || setImageFromDB == "" || setImageFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setImageFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setImageFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbImageURLAttribute);
+                    return GetSetImageFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbImageURLAttribute);
-                return GetSetImageFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -530,20 +573,27 @@ namespace BrickLinkBrickSet
                 string setYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
                 string setYear = GetSetInformationFromBrickLink(setID, dbYearAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setYear != "")
                 {
-                    if (setYearFromDB == "N/A" || setYearFromDB == "" || setYearFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;
+                        if (setYearFromDB == "N/A" || setYearFromDB == "" || setYearFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return setYearFromDB;
+                        }
                     }
-                    else
-                    {
-                        return setYearFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbYearAttribute);
+                    return GetSetReleaseYearFBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbYearAttribute);
-                return GetSetReleaseYearFBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -559,20 +609,27 @@ namespace BrickLinkBrickSet
                 string SetTypeFromDB = ReadSetInformationFromDB(setID, dbTypeAttribute);
                 string SetType = GetSetInformationFromBrickLink(setID, dbTypeAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetType != "")
                 {
-                    if (SetTypeFromDB == "N/A" || SetTypeFromDB == "" || SetTypeFromDB == "no results")
+                    while (!callDB)
                     {
-                        callDB = true;
+                        if (SetTypeFromDB == "N/A" || SetTypeFromDB == "" || SetTypeFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return SetTypeFromDB;
+                        }
                     }
-                    else
-                    {
-                        return SetTypeFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbTypeAttribute);
+                    return GetSetTypeFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbTypeAttribute);
-                return GetSetTypeFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -588,20 +645,28 @@ namespace BrickLinkBrickSet
                 string SetAvgPriceFromDB = ReadSetInformationFromDB(setID, dbAvgPriceAttribute);
                 string SetAvgPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetAvgPrice != "")
                 {
-                    if (SetAvgPriceFromDB == "N/A" || SetAvgPriceFromDB == "" || SetAvgPriceFromDB == "no results") 
+                    while (!callDB)
                     {
-                        callDB = true;
+                        if (SetAvgPriceFromDB == "N/A" || SetAvgPriceFromDB == "" || SetAvgPriceFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return SetAvgPriceFromDB;
+                        }
                     }
-                    else
-                    {
-                        return SetAvgPriceFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbAvgPriceAttribute);
+                    return GetSetAvgPriceFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbAvgPriceAttribute);
-                return GetSetAvgPriceFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+
+                }
             }
             catch (Exception ex)
             {
@@ -617,21 +682,28 @@ namespace BrickLinkBrickSet
             {
                 string SetCategoryFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
                 string SetCategory = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
-                Boolean callDB = false;
-                while (!callDB)
+                if (SetCategory != "")
                 {
-                    if (SetCategoryFromDB == "N/A" || SetCategoryFromDB == "" || SetCategoryFromDB == "no results")
+                    Boolean callDB = false;
+                    while (!callDB)
                     {
-                        callDB = true; 
+                        if (SetCategoryFromDB == "N/A" || SetCategoryFromDB == "" || SetCategoryFromDB == "no results")
+                        {
+                            callDB = true;
+                        }
+                        else
+                        {
+                            return SetCategoryFromDB;
+                        }
                     }
-                    else
-                    {
-                        return SetCategoryFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbCategoryIDAttribute);
+                    return GetSetCategoryFromBrickLink(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbCategoryIDAttribute);
-                return GetSetCategoryFromBrickLink(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -650,7 +722,7 @@ namespace BrickLinkBrickSet
                 string cacheReader = ReadSetInformationFromDB(setID, dbIDAttribute);
                 DateTime today = DateTime.Now;
                 today.ToString("yyyy-MM-dd");
-                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
+                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets=true;";
                 SqlConnection setCacheConnection = new SqlConnection(connectionString);
                 setCacheConnection.Open();
 
@@ -748,6 +820,7 @@ namespace BrickLinkBrickSet
                             setCacheConnection.Close();
                             return "There was an error inserting the values to the DB";
                         }
+                        setCacheConnection.Close();
                         return "Entry was added to the DB";
                     }
                     else
@@ -780,6 +853,7 @@ namespace BrickLinkBrickSet
                                 return "There was an error updating the values to the DB";
                             }
                         }
+                        setCacheConnection.Close();
                         return "DB Record updated";
                     }
                 }
@@ -870,28 +944,31 @@ namespace BrickLinkBrickSet
                 JObject setObj = JObject.Parse(cleanJSONPayload);
                 if (!setObj.ToString().Contains("API limit exceeded"))
                 {
-                    if (attribute == brickSetImageURLAttribute || attribute == brickSetThumbnailURLAttribute)
+                    if (setObj["sets"].HasValues)
                     {
-                        setInformation = (string)setObj["sets"][0]["image"][attribute] ?? "N/A";
-                    }
-                    else if (attribute == brickSetUPCAttribute)
-                    {
-                        setInformation = (string)setObj["sets"][0]["barcode"][attribute] ?? "N/A";
-                        if (setInformation == "N/A")
-                            setInformation = (string)setObj["sets"][0]["barcode"]["EAN"] ?? "N/A";
-                    }
-                    else if (attribute == brickSetDescriptionAttribute)
-                    {
-                        setInformation = HttpUtility.HtmlDecode((string)setObj["sets"][0]["extendedData"][attribute]).Replace("<p>", "").Replace("</p>", "") ?? "N/A";
-                    }
-                    else if (attribute.Contains(brickSetOriginalSellPriceAttribute))
-                    {
-                        string countryCode = attribute.Substring(11);
-                        setInformation = (string)setObj["sets"][0]["LEGOCom"][countryCode][brickSetOriginalSellPriceAttribute] ?? "N/A";
-                    }
-                    else
-                    {
-                        setInformation = (string)setObj["sets"][0][attribute] ?? "N/A";
+                        if (attribute == brickSetImageURLAttribute || attribute == brickSetThumbnailURLAttribute)
+                        {
+                            setInformation = (string)setObj["sets"][0]["image"][attribute] ?? "N/A";
+                        }
+                        else if (attribute == brickSetUPCAttribute)
+                        {
+                            setInformation = (string)setObj["sets"][0]["barcode"][attribute] ?? "N/A";
+                            if (setInformation == "N/A")
+                                setInformation = (string)setObj["sets"][0]["barcode"]["EAN"] ?? "N/A";
+                        }
+                        else if (attribute == brickSetDescriptionAttribute)
+                        {
+                            setInformation = HttpUtility.HtmlDecode((string)setObj["sets"][0]["extendedData"][attribute]).Replace("<p>", "").Replace("</p>", "") ?? "N/A";
+                        }
+                        else if (attribute.Contains(brickSetOriginalSellPriceAttribute))
+                        {
+                            string countryCode = attribute.Substring(11);
+                            setInformation = (string)setObj["sets"][0]["LEGOCom"][countryCode][brickSetOriginalSellPriceAttribute] ?? "N/A";
+                        }
+                        else
+                        {
+                            setInformation = (string)setObj["sets"][0][attribute] ?? "N/A";
+                        }                        
                     }
                     return setInformation;
                 }
@@ -914,32 +991,39 @@ namespace BrickLinkBrickSet
                 string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
                 string setName = GetSetAttributeFromBrickSet(setID, brickSetNameAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setName != "")
                 {
-                    if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
                         {
-                            return setName;
-                        }
-                        else if (setName != setNameFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setName;
+                            }
+                            else if (setName != setNameFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setName;
+                            }
                         }
                         else
                         {
-                            return setName;
+                            return setNameFromDB;
                         }
                     }
-                    else
-                    {
-                        return setNameFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbNameAttribute);
+                    return GetSetNameFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbNameAttribute);
-                return GetSetNameFromBrickSet(setID);
-            }            
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
+            }
             catch (Exception ex)
             {
                 return ex.Message.ToString();
@@ -954,31 +1038,38 @@ namespace BrickLinkBrickSet
                 string setPartNumFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
                 string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetThemeAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setPartNum != "")
                 {
-                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                         {
-                            return setPartNum;
-                        }
-                        else if (setPartNum != setPartNumFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setPartNum;
+                            }
+                            else if (setPartNum != setPartNumFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setPartNum;
+                            }
                         }
                         else
                         {
-                            return setPartNum;
+                            return setPartNumFromDB;
                         }
                     }
-                    else
-                    {
-                        return setPartNumFromDB;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbTypeAttribute);
+                    return GetSetThemeFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbTypeAttribute);
-                return GetSetThemeFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -994,31 +1085,38 @@ namespace BrickLinkBrickSet
                 string setImageURLFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
                 string setImageURL = GetSetAttributeFromBrickSet(setID, brickSetImageURLAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setImageURL != "")
                 {
-                    if (setImageURLFromDB == "N/A" || setImageURLFromDB == "" || setImageURLFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setImageURLFromDB == "N/A" || setImageURLFromDB == "" || setImageURLFromDB == "no results")
                         {
-                            return setImageURL;
-                        }
-                        else if (setImageURL != setImageURLFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setImageURL;
+                            }
+                            else if (setImageURL != setImageURLFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setImageURL;
+                            }
                         }
                         else
                         {
                             return setImageURL;
                         }
                     }
-                    else
-                    {
-                        return setImageURL;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbImageURLAttribute);
+                    return GetSetThemeFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbImageURLAttribute);
-                return GetSetThemeFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1034,31 +1132,38 @@ namespace BrickLinkBrickSet
                 string setThumbnailURLFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
                 string setThumbnailURL = GetSetAttributeFromBrickSet(setID, brickSetThumbnailURLAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setThumbnailURL != "")
                 {
-                    if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "" || setThumbnailURLFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "" || setThumbnailURLFromDB == "no results")
                         {
-                            return setThumbnailURL;
-                        }
-                        else if (setThumbnailURL != setThumbnailURLFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setThumbnailURL;
+                            }
+                            else if (setThumbnailURL != setThumbnailURLFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setThumbnailURL;
+                            }
                         }
                         else
                         {
                             return setThumbnailURL;
                         }
                     }
-                    else
-                    {
-                        return setThumbnailURL;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbThumbnailURLAttribute);
+                    return GetSetThumbnailURLFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbThumbnailURLAttribute);
-                return GetSetThumbnailURLFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1074,31 +1179,38 @@ namespace BrickLinkBrickSet
                 string setReleaseYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
                 string setReleaseYear = GetSetAttributeFromBrickSet(setID, brickSetYearAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setReleaseYear != "")
                 {
-                    if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "" || setReleaseYearFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "" || setReleaseYearFromDB == "no results")
                         {
-                            return setReleaseYear;
-                        }
-                        else if (setReleaseYear != setReleaseYearFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setReleaseYear;
+                            }
+                            else if (setReleaseYear != setReleaseYearFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setReleaseYear;
+                            }
                         }
                         else
                         {
                             return setReleaseYear;
                         }
                     }
-                    else
-                    {
-                        return setReleaseYear;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbYearAttribute);
+                    return GetSetReleaseYearFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbYearAttribute);
-                return GetSetReleaseYearFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1114,31 +1226,38 @@ namespace BrickLinkBrickSet
                 string setPartNumFromDB = ReadSetInformationFromDB(setID, dbPartNumberAttribute);
                 string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setPartNum != "")
                 {
-                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                         {
-                            return setPartNum;
-                        }
-                        else if (setPartNum != setPartNumFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setPartNum;
+                            }
+                            else if (setPartNum != setPartNumFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setPartNum;
+                            }
                         }
                         else
                         {
                             return setPartNum;
                         }
                     }
-                    else
-                    {
-                        return setPartNum;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbPartNumberAttribute);
+                    return GetSetPartsNumberFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbPartNumberAttribute);
-                return GetSetPartsNumberFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1154,31 +1273,38 @@ namespace BrickLinkBrickSet
                 string setUPCFromDB = ReadSetInformationFromDB(setID, dbUPCAttribute);
                 string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (setUPC != "")
                 {
-                    if (setUPCFromDB == "N/A" || setUPCFromDB == "" || setUPCFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (setUPCFromDB == "N/A" || setUPCFromDB == "" || setUPCFromDB == "no results")
                         {
-                            return setUPC;
-                        }
-                        else if (setUPC != setUPCFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return setUPC;
+                            }
+                            else if (setUPC != setUPCFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return setUPC;
+                            }
                         }
                         else
                         {
                             return setUPC;
                         }
                     }
-                    else
-                    {
-                        return setUPC;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbUPCAttribute);
+                    return GetSetUPCFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbUPCAttribute);
-                return GetSetUPCFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1194,31 +1320,38 @@ namespace BrickLinkBrickSet
                 string SetDescriptionFromDB = ReadSetInformationFromDB(setID, dbDescriptoinAttribute);
                 string SetDescription = GetSetAttributeFromBrickSet(setID, brickSetDescriptionAttribute);
                 Boolean callDB = false;
-                while (!callDB)
+                if (SetDescription != "")
                 {
-                    if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "" || SetDescriptionFromDB == "no results")
+                    while (!callDB)
                     {
-                        if (setID == "BrickSet API limit exceeded")
+                        if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "" || SetDescriptionFromDB == "no results")
                         {
-                            return SetDescription;
-                        }
-                        else if (SetDescription != SetDescriptionFromDB)
-                        {
-                            callDB = true;
+                            if (setID == "BrickSet API limit exceeded")
+                            {
+                                return SetDescription;
+                            }
+                            else if (SetDescription != SetDescriptionFromDB)
+                            {
+                                callDB = true;
+                            }
+                            else
+                            {
+                                return SetDescription;
+                            }
                         }
                         else
                         {
                             return SetDescription;
                         }
                     }
-                    else
-                    {
-                        return SetDescription;
-                    }
+                    if (callDB)
+                        updateSetInCache(setID, dbDescriptoinAttribute);
+                    return GetSetDescriptionFromBrickSet(setID);
                 }
-                if (callDB)
-                    updateSetInCache(setID, dbDescriptoinAttribute);
-                return GetSetDescriptionFromBrickSet(setID);
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
@@ -1236,6 +1369,7 @@ namespace BrickLinkBrickSet
                     string setOrgPriceFromDB = ReadSetInformationFromDB(setID, dbOrgPriceAttribute);
                     string setOrgPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + country);
                     Boolean callDB = false;
+                    if (setOrgPrice != null) { 
                     while (!callDB)
                     {
                         if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
@@ -1264,6 +1398,11 @@ namespace BrickLinkBrickSet
                 }
                 else
                     return "Wrong country code entered, accetable values are: US, UK, CA and DE";
+                }
+                else
+                {
+                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                }
             }
             catch (Exception ex)
             {
