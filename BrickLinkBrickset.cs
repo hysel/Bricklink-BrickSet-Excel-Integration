@@ -315,7 +315,11 @@ namespace BrickLinkBrickSet
                 }
 
                 JObject setObj = JObject.Parse(setInformation);
-                if (!setObj.ToString().Contains("TIMESTAMP"))
+                if (setObj.ToString().Contains("The request was aborted: Could not create SSL/TLS secure channel"))
+                {
+                    return "TLS 1.2 is not enabled in your system. Please follow this link: https://t.ly/Bd3td";
+                }
+                else if (!setObj.ToString().Contains("TIMESTAMP"))
                 {
                     if (setObj.ContainsKey("data") && setObj["data"].HasValues)
                     {
@@ -352,7 +356,11 @@ namespace BrickLinkBrickSet
                             if (SetCategory != "N/A")
                             {
                                 var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
-                                if (!catObj.ToString().Contains("TIMESTAMP"))
+                                if (setObj.ToString().Contains("The request was aborted: Could not create SSL/TLS secure channel"))
+                                {
+                                    return "TLS 1.2 is not enabled in your system. Please follow this link: https://t.ly/Bd3td";
+                                }
+                                else if (!catObj.ToString().Contains("TIMESTAMP"))
                                 {
                                     setData = (string)catObj["data"]["category_name"] ?? "N /A";
                                 }
@@ -392,7 +400,9 @@ namespace BrickLinkBrickSet
                 string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
                 string setName = GetSetInformationFromBrickLink(setID, dbNameAttribute);
                 Boolean callDB = false;
-                if (setName != "")
+                if (setName.Contains("TLS)"))
+                    return setName;
+                else if (setName != "")
                 {
                     while (!callDB)
                     {
@@ -428,7 +438,9 @@ namespace BrickLinkBrickSet
                 string setNumberOfMinifiguresFromDB = ReadSetInformationFromDB(setID, dbNumOfMinifigsAttribute);
                 string setNumberOfMinifigures = setNumberOfMinifigures = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
                 Boolean callDB = false;
-                if (setNumberOfMinifigures != "")
+                if (setNumberOfMinifigures.Contains("TLS)"))
+                    return setNumberOfMinifigures;
+                else if (setNumberOfMinifigures != "")
                 {
                     while (!callDB)
                     {
@@ -464,7 +476,9 @@ namespace BrickLinkBrickSet
                 string setMiniFigCollectionFromDB = ReadSetInformationFromDB(setID, dbSetMinifiguresAttribute);
                 string SetMiniFigCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
                 Boolean callDB = false;
-                if (SetMiniFigCollection != "")
+                if (SetMiniFigCollection.Contains("TLS)"))
+                    return SetMiniFigCollection;
+                else if (SetMiniFigCollection != "")
                 {
                     while (!callDB)
                     {
@@ -500,7 +514,9 @@ namespace BrickLinkBrickSet
                 string setThumbnailFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
                 string SetThumbnail = GetSetInformationFromBrickLink(setID, dbThumbnailURLAttribute);
                 Boolean callDB = false;
-                if (SetThumbnail != "")
+                if (SetThumbnail.Contains("TLS)"))
+                    return SetThumbnail;
+                else if (SetThumbnail != "")
                 {
                     while (!callDB)
                     {
@@ -537,7 +553,9 @@ namespace BrickLinkBrickSet
                 string setImageFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
                 string SetImage = GetSetInformationFromBrickLink(setID, dbImageURLAttribute);
                 Boolean callDB = false;
-                if (SetImage != "")
+                if (SetImage.Contains("TLS)"))
+                    return SetImage;
+                else if (SetImage != "")
                 {
                     while (!callDB)
                     {
@@ -573,7 +591,9 @@ namespace BrickLinkBrickSet
                 string setYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
                 string setYear = GetSetInformationFromBrickLink(setID, dbYearAttribute);
                 Boolean callDB = false;
-                if (setYear != "")
+                if (setYear.Contains("TLS)"))
+                    return setYear;
+                else if (setYear != "")
                 {
                     while (!callDB)
                     {
@@ -609,7 +629,9 @@ namespace BrickLinkBrickSet
                 string SetTypeFromDB = ReadSetInformationFromDB(setID, dbTypeAttribute);
                 string SetType = GetSetInformationFromBrickLink(setID, dbTypeAttribute);
                 Boolean callDB = false;
-                if (SetType != "")
+                if (SetType.Contains("TLS)"))
+                    return SetType;
+                else if (SetType != "")
                 {
                     while (!callDB)
                     {
@@ -645,7 +667,9 @@ namespace BrickLinkBrickSet
                 string SetAvgPriceFromDB = ReadSetInformationFromDB(setID, dbAvgPriceAttribute);
                 string SetAvgPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
                 Boolean callDB = false;
-                if (SetAvgPrice != "")
+                if (SetAvgPrice.Contains("TLS)"))
+                    return SetAvgPrice;
+                else if (SetAvgPrice != "")
                 {
                     while (!callDB)
                     {
@@ -682,7 +706,9 @@ namespace BrickLinkBrickSet
             {
                 string SetCategoryFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
                 string SetCategory = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
-                if (SetCategory != "")
+                if (SetCategory.Contains("TLS)"))
+                    return SetCategory;
+                else if (SetCategory != "")
                 {
                     Boolean callDB = false;
                     while (!callDB)
@@ -751,7 +777,11 @@ namespace BrickLinkBrickSet
                 }
 
                 var setObj = JObject.Parse(setInformation);
-                if (!setObj.ToString().Contains("TIMESTAMP"))
+                if (setObj.ToString().Contains("The request was aborted: Could not create SSL/TLS secure channel"))
+                {
+                    return "TLS 1.2 is not enabled in your system. Please follow this link: https://t.ly/Bd3td";
+                }
+                else if (!setObj.ToString().Contains("TIMESTAMP"))
                 {
                     // get set information
                     string setName = (string)setObj["data"]["name"] ?? "N/A";
