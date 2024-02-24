@@ -1027,7 +1027,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setName == "BrickSet API limit exceeded")
                             {
                                 return setName;
                             }
@@ -1074,7 +1074,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setPartNum == "BrickSet API limit exceeded")
                             {
                                 return setPartNum;
                             }
@@ -1098,7 +1098,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1121,7 +1121,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setImageURLFromDB == "N/A" || setImageURLFromDB == "" || setImageURLFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setImageURL == "BrickSet API limit exceeded")
                             {
                                 return setImageURL;
                             }
@@ -1145,7 +1145,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1168,7 +1168,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "" || setThumbnailURLFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setThumbnailURL == "BrickSet API limit exceeded")
                             {
                                 return setThumbnailURL;
                             }
@@ -1192,7 +1192,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1215,7 +1215,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "" || setReleaseYearFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setReleaseYear == "BrickSet API limit exceeded")
                             {
                                 return setReleaseYear;
                             }
@@ -1239,7 +1239,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1262,7 +1262,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setPartNum == "BrickSet API limit exceeded")
                             {
                                 return setPartNum;
                             }
@@ -1286,7 +1286,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1309,7 +1309,7 @@ namespace BrickLinkBrickSet
                     {
                         if (setUPCFromDB == "N/A" || setUPCFromDB == "" || setUPCFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (setUPC == "BrickSet API limit exceeded")
                             {
                                 return setUPC;
                             }
@@ -1333,7 +1333,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1356,7 +1356,7 @@ namespace BrickLinkBrickSet
                     {
                         if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "" || SetDescriptionFromDB == "no results")
                         {
-                            if (setID == "BrickSet API limit exceeded")
+                            if (SetDescription == "BrickSet API limit exceeded")
                             {
                                 return SetDescription;
                             }
@@ -1380,7 +1380,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
@@ -1405,7 +1405,7 @@ namespace BrickLinkBrickSet
                         {
                             if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
                             {
-                                if (setID == "BrickSet API limit exceeded")
+                                if (setOrgPrice == "BrickSet API limit exceeded")
                                 {
                                     return setOrgPrice;
                                 }
@@ -1432,7 +1432,7 @@ namespace BrickLinkBrickSet
                 }
                 else
                 {
-                    return "The set you entered could not be found in the BrickLink Database. Please double-check the SetID and try again.";
+                    return "The set you entered could not be found in the BrickSet Database. Please double-check the SetID and try again.";
                 }
             }
             catch (Exception ex)
