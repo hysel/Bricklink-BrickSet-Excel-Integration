@@ -9,35 +9,39 @@
 //  * Introduced new integration with BrickSet 
 //  * Major code optimization to reduce code duplication (I know I can do better :)
 //      
-// Pre-requisites: Please make sure you follow Microsoft guidelines regarding TLS 1.2: https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c
+// Provider HTTPS connections use TLS 1.2 on the legacy .NET Framework build.
 // I am not a developer, but I know how to write basic code, so please excuse any lousy code writing :)
 
+using ExcelDna.Integration;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Web;
-using System.Xml;
 
 namespace BrickLinkBrickSet
 {
     public static class BricklinkBrickSetExcelIntegration
     {
-        // In this section, you will need to enter the various secrets and keys that are assigned to you by Bricklink 
+        // Configure the provider credentials in Windows Credential Manager.
         // For more information see:
         //  BrickLink: https://www.bricklink.com/v3/api.page
         //  BrickSet: https://brickset.com/api/v3.asmx
 
         // BrickLink 
-        const string consumerKey = "";                                                                  // The Consumer key
-        const string consumerSecret = "";                                                               // The Consumer Secret
-        const string tokenValue = "";                                                                   // The Token Value
-        const string tokenSecret = "";                                                                  // The Token Secret
+        private const string CredentialPrefix = "BrickLinkBrickSet/Legacy/";
         const string brickLinkSetURL = "https://api.bricklink.com/api/store/v3/items/set/";             // BrickLink API Set URL
         const string brickLinkGearURL = "https://api.bricklink.com/api/store/v3/items/gear/";           // BrickLink API Gear URL
         const string brickLinkMiniFigURL = "https://api.bricklink.com/api/store/v3/items/minifig/";     // BrickLink API Minifig URL
@@ -46,31 +50,15 @@ namespace BrickLinkBrickSet
         const string brickLinkCategoryURL = "https://api.bricklink.com/api/store/v3/categories/";       // BrickLink API Book URL        
 
         // BrickSet
-        const string brickSetApiKey = "";                      // Brickset API Key
-        const string bricksHash = "";                                 // Brickset Hash        
         const string brickSetSOAPUrl = "https://brickset.com/api/v3.asmx";      // Brickset URL
-        const string brickSetPartNumberAttribute = "pieces";                    // Bricket set part number attribute
-        const string brickSetNameAttribute = "name";                            // Bricket set name attribute
-        const string brickSetYearAttribute = "year";                            // Bricket set release year attribute
-        const string brickSetThemeAttribute = "theme";                          // Bricket set theme attribute
-        const string brickSetImageURLAttribute = "imageURL";                    // Bricket set image attribute
-        const string brickSetThumbnailURLAttribute = "thumbnailURL";            // Bricket set thumbnail attribute
-        const string brickSetOriginalSellPriceAttribute = "retailPrice";        // Bricket set original sell price attribute
-        const string brickSetUPCAttribute = "UPC";                              // Bricket set UPC attribute 
-        const string brickSetDescriptionAttribute = "description";              // Bricket set description attribute 
 
-        public static string tokenx = "";
+        public static string tokenx = string.Empty;
 
         // DB Detailes (for cache)
-        const string DataSource = "";                           // The DB server name
-        const string InitialCatalog = "";                       // The Database NAME
-        const string DBUser = "";                               // The DB username
-        const string DBPassword = "";                           // The DB password        
-        const string dbIDAttribute = "ID";                      // The DB column that holds the set number        
         const string dbNameAttribute = "name";                  // The DB column that holds the set name        
         const string dbTypeAttribute = "type";                  // The DB column that holds the set name        
         const string dbCategoryIDAttribute = "categoryID";      // The DB column that holds the set category  
-        const string dbImageURLAttribute = "image_URL";          // The DB column that holds the set image URL 
+        const string dbImageURLAttribute = "image_url";          // The DB column that holds the set image URL
         const string dbThumbnailURLAttribute = "thumbnail_url"; // The DB column that holds the set thumbnail URL 
         const string dbYearAttribute = "year_released";         // The DB column that holds the set release year  
         const string dbAvgPriceAttribute = "avg_price";         // The DB column that holds the set average price year (BrickLink only)
@@ -81,1139 +69,810 @@ namespace BrickLinkBrickSet
         const string dbOrgPriceAttribute = "original_price";    // The DB column that holds the set original price   
         const string dbSetMinifiguresAttribute = "minifigset";  // The DB columne that holds the set original price   
 
-        // Read set infromation from DB
-        private static string ReadSetInformationFromDB(String setID, String columnInput)
+        [StructLayout(LayoutKind.Sequential)]
+        private struct WindowsCredential
         {
+            public uint Flags;
+            public uint Type;
+            public IntPtr TargetName;
+            public IntPtr Comment;
+            public System.Runtime.InteropServices.ComTypes.FILETIME LastWritten;
+            public uint CredentialBlobSize;
+            public IntPtr CredentialBlob;
+            public uint Persist;
+            public uint AttributeCount;
+            public IntPtr Attributes;
+            public IntPtr TargetAlias;
+            public IntPtr UserName;
+        }
+
+        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CredReadW(string target, uint type, uint flags, out IntPtr credential);
+
+        [DllImport("Advapi32.dll", ExactSpelling = true)]
+        private static extern void CredFree(IntPtr credential);
+
+        private static string ReadCredential(string name)
+        {
+            const uint genericCredential = 1;
+            const int credentialNotFound = 1168;
+            string target = CredentialPrefix + name;
+            if (!CredReadW(target, genericCredential, 0, out IntPtr entry))
+            {
+                int error = Marshal.GetLastWin32Error();
+                throw new LookupException(error == credentialNotFound
+                    ? "Missing Windows Credential Manager entry: " + target
+                    : $"Could not read Windows Credential Manager entry {target} (Windows error {error}).");
+            }
+
             try
             {
-                string dbResults = "N/A";
-                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
-                SqlConnection dbSetConnection = new(connectionString);
-                dbSetConnection.Open();
-                String sql = "SELECT " + columnInput + " FROM [dbo].Sets where ID='" + setID + "'";
-                SqlCommand command = new(sql, dbSetConnection);
-                SqlDataReader dbSetReader = command.ExecuteReader();
+                var credential = Marshal.PtrToStructure<WindowsCredential>(entry);
+                return DecodeCredential(credential.CredentialBlob, credential.CredentialBlobSize, target);
+            }
+            finally
+            {
+                CredFree(entry);
+            }
+        }
 
-                if (dbSetReader.HasRows)
+        private static string DecodeCredential(IntPtr blob, uint byteLength, string target)
+        {
+            const uint maxCredentialBlobBytes = 2560;
+            if (blob == IntPtr.Zero || byteLength == 0 || byteLength > maxCredentialBlobBytes || byteLength % 2 != 0)
+            {
+                throw new LookupException("Incomplete or invalid Windows Credential Manager entry: " + target);
+            }
+
+            string password = Marshal.PtrToStringUni(blob, (int)byteLength / 2).TrimEnd('\0');
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new LookupException("Empty password in Windows Credential Manager entry: " + target);
+            }
+
+            return password;
+        }
+
+        private static string GetCacheConnectionString()
+        {
+            return new SqlConnectionStringBuilder
+            {
+                DataSource = ReadCredential("SqlServer"),
+                InitialCatalog = ReadCredential("SqlDatabase"),
+                UserID = ReadCredential("SqlUser"),
+                Password = ReadCredential("SqlPassword")
+            }.ConnectionString;
+        }
+
+
+        private static readonly ConcurrentDictionary<string, Lazy<string>> CacheRefreshes =
+            new(StringComparer.Ordinal);
+        private static readonly ConcurrentDictionary<string, Lazy<JObject>> BrickSetLookups =
+            new(StringComparer.OrdinalIgnoreCase);
+        private static readonly SemaphoreSlim ProviderSlots = new(4);
+        private static readonly Lazy<HttpClient> ProviderHttpClient = new(() => new HttpClient(CreateProviderHttpHandler())
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        });
+        private const string NotAvailable = "N/A";
+        private const string SetNotFound = "No Set Information has been found";
+        private const string LatestCacheRowOrder = "ORDER BY [date_updated] DESC, [ID] COLLATE Latin1_General_100_BIN2";
+
+        private sealed class LookupException : InvalidOperationException
+        {
+            public LookupException(string message) : base(message) { }
+        }
+
+        private static string GetLookupError(Exception error)
+        {
+            if (error is LookupException)
+            {
+                return error.Message;
+            }
+
+            return error is SqlException sqlError
+                ? $"SQL cache operation failed (SQL error {sqlError.Number})."
+                : "Legacy lookup failed.";
+        }
+
+        private static string ValidateSetId(string setID)
+        {
+            string id = setID?.Trim();
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new LookupException("Enter a set ID.");
+            }
+            return id;
+        }
+
+        private static string ReadSetInformationFromDB(string connectionString, string setID, string column)
+        {
+            if (column is not (dbNameAttribute or dbTypeAttribute or dbCategoryIDAttribute or
+                dbImageURLAttribute or dbThumbnailURLAttribute or dbYearAttribute or dbAvgPriceAttribute or
+                dbPartNumberAttribute or dbNumOfMinifigsAttribute or dbUPCAttribute or
+                dbDescriptoinAttribute or dbOrgPriceAttribute or dbSetMinifiguresAttribute))
+            {
+                throw new ArgumentOutOfRangeException(nameof(column));
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var command = new SqlCommand(
+                "SELECT TOP (1) [" + column + "] FROM [dbo].[Sets] WHERE [ID] = @setID " + LatestCacheRowOrder,
+                connection);
+            command.Parameters.Add("@setID", SqlDbType.NVarChar, -1).Value = setID;
+            using var reader = command.ExecuteReader();
+            if (!reader.Read())
+            {
+                return NotAvailable;
+            }
+
+            string value = Convert.ToString(reader.GetValue(0));
+            if (column is dbImageURLAttribute or dbThumbnailURLAttribute)
+            {
+                return NormalizeImageUrl(value);
+            }
+
+            // Older fills may have repeated an ID with its last quantity. Refresh those rows from the provider.
+            return column == dbSetMinifiguresAttribute && HasDuplicateMinifigureIds(value) ? NotAvailable : value;
+        }
+
+        private static bool HasDuplicateMinifigureIds(string value)
+        {
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string entry in value.Split(new[] { ", " }, StringSplitOptions.None))
+            {
+                int quantityStart = entry.LastIndexOf(" (", StringComparison.Ordinal);
+                if (quantityStart > 0 && entry.EndsWith(")", StringComparison.Ordinal) &&
+                    !ids.Add(entry.Substring(0, quantityStart)))
                 {
-                    while (dbSetReader.Read())
-                    {
-                        dbResults = Convert.ToString(dbSetReader[columnInput]);
-                    }
-                    dbSetConnection.Close();
-                    dbSetConnection.Close();
+                    return true;
                 }
-                return dbResults;
             }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return false;
         }
 
-        //**** BrickLink ********
-        private static string Escape(string s)
+        private static bool CacheFieldIsMissing(string value) =>
+            string.IsNullOrWhiteSpace(value) || value is NotAvailable or "no results";
+
+        private static string NormalizeImageUrl(string value)
         {
-            string[] charsToEscape = new[] { "!", "*", "'", "(", ")" };
-            StringBuilder escaped = new StringBuilder(Uri.EscapeDataString(s));
-            foreach (var t in charsToEscape)
+            if (string.IsNullOrWhiteSpace(value))
             {
-                escaped.Replace(t, Uri.HexEscape(t[0]));
+                return NotAvailable;
             }
-            return escaped.ToString();
+
+            value = value.Trim();
+            if (value.StartsWith("//", StringComparison.Ordinal))
+            {
+                value = "https:" + value;
+            }
+
+            return Uri.TryCreate(value, UriKind.Absolute, out Uri uri) &&
+                (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp) &&
+                !string.IsNullOrEmpty(uri.Host)
+                ? value
+                : NotAvailable;
         }
 
-        private static readonly string[] UriRfc3986CharsToEscape = new[] { "!", "*", "'", "(", ")" };
-
-        // The following section was build using the example shown here: https://stackoverflow.com/questions/47378232/rest-api-authentication-oauth-1-0-using-c-sharp
-        // Original Code written by https://stackoverflow.com/users/3854205/halvorsen THANK YOU!
-
-        private static string EscapeUriDataStringRfc3986(string value)
+        private static T WithProviderSlot<T>(Func<T> operation)
         {
-            StringBuilder escaped = new StringBuilder(Uri.EscapeDataString(value));
-            for (int i = 0; i < UriRfc3986CharsToEscape.Length; i++)
+            if (!ProviderSlots.Wait(TimeSpan.FromSeconds(30)))
             {
-                escaped.Replace(UriRfc3986CharsToEscape[i], Uri.HexEscape(UriRfc3986CharsToEscape[i][0]));
+                throw new LookupException("All provider request slots are busy. Recalculate to retry.");
             }
-            return escaped.ToString();
+            try { return operation(); }
+            finally { ProviderSlots.Release(); }
         }
 
-        // 11-3-2022 Added this section to try to better deal with the TIMESTAMP errors
-        private static string GenerateNonce(string extra = "")
+        private static T RunSharedLookup<T>(ConcurrentDictionary<string, Lazy<T>> pending, string key, Func<T> lookup)
         {
-            string result = "";
-            SHA1 sha1 = SHA1.Create();
-
-            Random rand = new Random();
-            StringBuilder sb = new StringBuilder(1024);
-            while (result.Length < 32)
+            var candidate = new Lazy<T>(lookup, LazyThreadSafetyMode.ExecutionAndPublication);
+            var active = pending.GetOrAdd(key, candidate);
+            try { return active.Value; }
+            finally
             {
-                sb.Length = 0;
-                string[] generatedRandoms = new string[4];
-
-                for (int i = 0; i < 4; i++)
+                if (ReferenceEquals(candidate, active))
                 {
-                    sb.Append(rand.Next());
+                    pending.TryRemove(key, out _);
                 }
-
-                sb.Append("|")
-                    .Append(extra);
-
-                result += Convert.ToBase64String(
-                    sha1.ComputeHash(Encoding.ASCII.GetBytes(sb.ToString()))
-                    ).TrimEnd('=')
-                     .Replace("/", "")
-                     .Replace("+", "");
             }
-
-            return result.Substring(0, 32);
         }
 
-
-        // This method will connect to the BrickLink API and pull the associated record including the entire payload which will help us grab individual data point like the set name, release date and average price
-        // Example: 
-        /*
-         * https://api.bricklink.com/api/store/v1/items/set/10030-1
-         * 
-         *     {
-                "meta": {
-                    "description": "OK",
-                    "message": "OK",
-                    "code": 200
-                },
-                "data": {
-                    "no": "10030-1",
-                    "name": "Imperial Star Destroyer - UCS",
-                    "type": "SET",
-                    "category_id": 65,
-                    "image_url": "//img.bricklink.com/SL/10030-1.jpg",
-                    "thumbnail_url": "//img.bricklink.com/S/10030-1.gif",
-                    "weight": "9093.00",
-                    "dim_x": "58.80",
-                    "dim_y": "50.50",
-                    "dim_z": "21.00",
-                    "year_released": 2002,
-                    "description": "<p />Instructions for this set came in two forms.  A 'classic bound' or glued spine version, and a 'spiral bound' version.\r\n<p />The early production runs of this set featured Light Gray elements but subsequent production runs have contained varying mixtures of Light Gray and Light Bluish Gray elements.",
-                    "is_obsolete": false
-                }
-        */
-        private static string GetSetInformation(string url, string requestType)
+        private static readonly string[] BrickLinkItemUrls =
         {
+            brickLinkSetURL, brickLinkGearURL, brickLinkMiniFigURL, brickLinkPartURL, brickLinkBooksURL
+        };
+
+        private static string EscapeOAuth(string value) => Uri.EscapeDataString(value)
+            .Replace("!", "%21").Replace("*", "%2A").Replace("'", "%27").Replace("(", "%28").Replace(")", "%29");
+
+        private static HttpClientHandler CreateProviderHttpHandler() => new()
+        {
+            SslProtocols = SslProtocols.Tls12,
+            AllowAutoRedirect = false,
+            UseCookies = false,
+            MaxConnectionsPerServer = 4
+        };
+
+        private static HttpResponseMessage SendProviderRequest(HttpRequestMessage request, string service)
+        {
+            try { return ProviderHttpClient.Value.SendAsync(request).GetAwaiter().GetResult(); }
+            catch (OperationCanceledException)
+            {
+                throw new LookupException($"{service} connection timed out.");
+            }
+            catch (HttpRequestException error)
+            {
+                var status = (error.InnerException as WebException)?.Status;
+                throw new LookupException(status.HasValue
+                    ? $"{service} connection failed ({status.Value})."
+                    : $"{service} connection failed.");
+            }
+        }
+
+        private static (int Code, JObject Body) RequestBrickLink(string url)
+        {
+            string consumerKey = ReadCredential("BrickLinkConsumerKey");
+            string consumerSecret = ReadCredential("BrickLinkConsumerSecret");
+            string token = ReadCredential("BrickLinkToken");
+            string tokenSecret = ReadCredential("BrickLinkTokenSecret");
+            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+            string nonce = Guid.NewGuid().ToString("N");
+            var oauth = new[]
+            {
+                ("oauth_consumer_key", consumerKey),
+                ("oauth_nonce", nonce),
+                ("oauth_signature_method", "HMAC-SHA1"),
+                ("oauth_timestamp", timestamp),
+                ("oauth_token", token),
+                ("oauth_version", "1.0")
+            };
+            string parameters = string.Join("&", oauth.Select(pair => pair.Item1 + "=" + EscapeOAuth(pair.Item2)));
+            string signatureBase = "GET&" + EscapeOAuth(url) + "&" + EscapeOAuth(parameters);
+            byte[] key = Encoding.ASCII.GetBytes(EscapeOAuth(consumerSecret) + "&" + EscapeOAuth(tokenSecret));
+            string signature;
             try
             {
-                // This section will determine if the original request was made using the GetSetPrice function and will change the base URL to retrieve the pricing information 
-                if (requestType != "info")
-                {
-                    url += "/price";
-                }
-
-                var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-                httpWebRequest.Method = "GET";
-                // Add TLS 1.2 support            
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
-                ServicePointManager.DefaultConnectionLimit = 9999;
-
-
-                string timeStamp = ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString();
-                string nonce = GenerateNonce("");
-
-
-                string signatureBaseString = Escape(httpWebRequest.Method.ToUpper()) + "&";
-                signatureBaseString += EscapeUriDataStringRfc3986(url) + "&";
-                signatureBaseString += EscapeUriDataStringRfc3986(
-                    "oauth_consumer_key=" + EscapeUriDataStringRfc3986(consumerKey) + "&" +
-                    "oauth_nonce=" + EscapeUriDataStringRfc3986(nonce) + "&" +
-                    "oauth_signature_method=" + EscapeUriDataStringRfc3986("HMAC-SHA1") + "&" +
-                    "oauth_timestamp=" + EscapeUriDataStringRfc3986(timeStamp) + "&" +
-                    "oauth_token=" + EscapeUriDataStringRfc3986(tokenValue) + "&" +
-                    "oauth_version=" + EscapeUriDataStringRfc3986("1.0"));
-
-                string key = EscapeUriDataStringRfc3986(consumerSecret) + "&" + EscapeUriDataStringRfc3986(tokenSecret);
-                var signatureEncoding = new ASCIIEncoding();
-                byte[] keyBytes = signatureEncoding.GetBytes(key);
-                byte[] signatureBaseBytes = signatureEncoding.GetBytes(signatureBaseString);
-                string signatureString;
-                using (var hmacsha1 = new HMACSHA1(keyBytes))
-                {
-                    byte[] hashBytes = hmacsha1.ComputeHash(signatureBaseBytes);
-                    signatureString = Convert.ToBase64String(hashBytes);
-                }
-                signatureString = EscapeUriDataStringRfc3986(signatureString);
-
-                string SimpleQuote(string s) => '"' + s + '"';
-
-                string header = "OAuth oauth_consumer_key=" + SimpleQuote(consumerKey) + ",oauth_token=" + SimpleQuote(tokenValue) + ",oauth_signature_method=" + SimpleQuote("HMAC-SHA1") + ",oauth_timestamp=" + SimpleQuote(timeStamp) + ",oauth_nonce=" + SimpleQuote(nonce) + ",oauth_version=" + SimpleQuote("1.0") + ",oauth_signature=" + SimpleQuote(signatureString);
-
-                httpWebRequest.Headers.Add(HttpRequestHeader.Authorization, header);
-                var response = (HttpWebResponse)httpWebRequest.GetResponse();
-                string characterSet = ((HttpWebResponse)response).CharacterSet;
-                var responseEncoding = characterSet == ""
-                    ? Encoding.UTF8
-                    : Encoding.GetEncoding(characterSet ?? "utf-8");
-                var responsestream = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                if (responsestream == null)
-                {
-                    throw new ArgumentNullException(nameof(characterSet));
-                }
-                return responsestream;
+                using var hmac = new HMACSHA1(key);
+                signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.ASCII.GetBytes(signatureBase)));
             }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            finally { Array.Clear(key, 0, key.Length); }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            string header = string.Join(",", oauth.Select(pair => pair.Item1 + "=\"" + EscapeOAuth(pair.Item2) + "\""));
+            request.Headers.Authorization = new AuthenticationHeaderValue(
+                "OAuth", header + ",oauth_signature=\"" + EscapeOAuth(signature) + "\"");
+            using var response = SendProviderRequest(request, "BrickLink");
+            string content = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return ReadBrickLinkResponse((int)response.StatusCode, content);
         }
 
-        private static string GetSetInformationFromBrickLink(string setID, string attribute)
+        private static (int Code, JObject Body) ReadBrickLinkResponse(int status, string content)
         {
-            int setMiniFigNum = 0;
-            string setData = "";
-            string setInformation;
-            string setMinifigureCollection = "";
-            int minifigCountValue = 0;
-            string typeOfRequest = "info";
-            string URL = "";
-
-            switch (attribute)
+            bool httpSuccess = status >= 200 && status < 300;
+            try
             {
-                case dbNumOfMinifigsAttribute:
-                    URL = "/subsets";
-                    break;
-
-                case dbSetMinifiguresAttribute:
-                    URL = "/subsets";
-                    break;
-
-                case dbAvgPriceAttribute:
-                    typeOfRequest = "price";
-                    break;
+                var body = JObject.Parse(content);
+                var meta = body["meta"] as JObject;
+                int code = httpSuccess && int.TryParse((string)meta?["code"], out int apiCode) ? apiCode : status;
+                return (code, body);
             }
-
-            setInformation = GetSetInformation(brickLinkSetURL + setID + "-1" + URL, typeOfRequest);
-
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
+            catch (Newtonsoft.Json.JsonException)
             {
-                setInformation = GetSetInformation(brickLinkSetURL + setID + URL, typeOfRequest);
-            }
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkGearURL + setID + URL, typeOfRequest);
-            }
-            // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkMiniFigURL + setID + URL, typeOfRequest);
-            }
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkPartURL + setID + URL, typeOfRequest);
-            }
-            // 5-21-2023 Added this section to deal with old booklets
-            if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-            {
-                setInformation = GetSetInformation(brickLinkBooksURL + setID + URL, typeOfRequest);
-            }            
-
-            JObject setObj = JObject.Parse(setInformation);
-            if (!setObj.ToString().Contains("TIMESTAMP"))
-            {
-                if (setObj.ContainsKey("data"))
+                if (httpSuccess)
                 {
-                    if (attribute == dbNumOfMinifigsAttribute)
-                    {
-                        IEnumerable<JToken> partsonly = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].quantity");
-
-                        foreach (JToken part in partsonly)
-                        {
-                            setMiniFigNum += (int)part;
-                        }
-                        setData = setMiniFigNum.ToString();
-                    }
-                    else if (attribute == dbSetMinifiguresAttribute)
-                    {
-                        {
-                            IEnumerable<JToken> minifiguresSet = setObj.SelectTokens("$..entries[?(@..type == 'MINIFIG')].item.no");
-                            foreach (JToken minifigure in minifiguresSet)
-                            {
-                                IEnumerable<JToken> minifigureData = setObj.SelectTokens("$..entries[?(@..no == '" + minifigure + "')].quantity");
-                                foreach (JToken minifigureCount in minifigureData)
-                                {
-                                    minifigCountValue = (int)minifigureCount;
-                                }
-                                setMinifigureCollection += minifigure + " (" + minifigCountValue.ToString() + "), ";
-                            }
-
-                            if (setMinifigureCollection.Length > 0)   
-                                setData = setMinifigureCollection.Substring(0, setMinifigureCollection.Length - 2);
-                        }
-                    }
-                    else if (attribute == dbCategoryIDAttribute)
-                    {
-                        string SetCategory = (string)setObj["data"]["category_id"] ?? "N/A";
-                        if (SetCategory != "N/A")
-                        {
-                            var catObj = JObject.Parse(GetSetInformation(brickLinkCategoryURL + SetCategory, "info"));
-                            if (!catObj.ToString().Contains("TIMESTAMP"))
-                            {
-                                setData = (string)catObj["data"]["category_name"] ?? "N /A";
-                            }
-                            else
-                            {
-                                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                                Thread.Sleep(500);
-                                return GetSetCategoryFromBrickLink(setID);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        setData = (string)setObj["data"][attribute] ?? "N/A";
-                    }
+                    throw new LookupException("BrickLink returned an invalid response.");
                 }
-                return setData;
-            }
-            else
-            {
-                // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                Thread.Sleep(500);
-                return GetSetInformationFromBrickLink(setID, attribute);
+                return (status, null);
             }
         }
 
-        //This function will return the item name 
+        private static JToken GetBrickLinkData(string url, bool allowMissing = false) =>
+            GetBrickLinkData(() => RequestBrickLink(url), allowMissing);
+
+        private static T GetOptionalBrickLinkData<T>(string url) where T : JToken
+        {
+            JToken data = GetBrickLinkData(url, allowMissing: true);
+            if (data == null)
+            {
+                return null;
+            }
+            return data as T ?? throw new LookupException("BrickLink returned an unexpected data format.");
+        }
+
+        private static JToken GetBrickLinkData(Func<(int Code, JObject Body)> request, bool allowMissing)
+        {
+            const int maxAttempts = 3;
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                var (code, body) = request();
+                var data = body?["data"];
+                if (code >= 200 && code < 300 && data != null && data.Type != JTokenType.Null)
+                {
+                    return data;
+                }
+
+                var meta = body?["meta"] as JObject;
+                string error = (string)meta?["message"] + " " + (string)meta?["description"];
+                if (error.IndexOf("TIMESTAMP", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    if (attempt == maxAttempts)
+                    {
+                        throw new LookupException("BrickLink rejected the request timestamp after three attempts.");
+                    }
+                    Thread.Sleep(500);
+                    continue;
+                }
+
+                if (allowMissing && code is (400 or 404))
+                {
+                    return null;
+                }
+
+                throw new LookupException(code >= 200 && code < 300
+                    ? "BrickLink did not return the requested data."
+                    : $"BrickLink request failed (status {code}).");
+            }
+            throw new LookupException("BrickLink request failed.");
+        }
+
+        private static (JObject Item, string ItemUrl) FindBrickLinkItem(string setID)
+        {
+            string escaped = Uri.EscapeDataString(setID);
+            string url = brickLinkSetURL + escaped + "-1";
+            if (GetOptionalBrickLinkData<JObject>(url) is JObject variant)
+            {
+                return (variant, url);
+            }
+
+            foreach (string prefix in BrickLinkItemUrls)
+            {
+                url = prefix + escaped;
+                if (GetOptionalBrickLinkData<JObject>(url) is JObject item)
+                {
+                    return (item, url);
+                }
+            }
+            return (null, null);
+        }
+
+        private static (int Count, string Collection) SummarizeMinifigures(JArray subsets)
+        {
+            var quantities = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var order = new List<string>();
+            int total = 0;
+            if (subsets != null)
+            {
+                foreach (var subset in subsets.OfType<JObject>())
+                {
+                    if (subset["entries"] is not JArray entries)
+                    {
+                        continue;
+                    }
+
+                    foreach (var entry in entries.OfType<JObject>())
+                    {
+                        var item = entry["item"] as JObject;
+                        string id = (string)item?["no"];
+                        if (!string.Equals((string)item?["type"], "MINIFIG", StringComparison.OrdinalIgnoreCase) ||
+                            string.IsNullOrWhiteSpace(id) || !int.TryParse((string)entry["quantity"], out int quantity) ||
+                            quantity <= 0)
+                        {
+                            continue;
+                        }
+
+                        if (!quantities.TryGetValue(id, out int previous))
+                        {
+                            order.Add(id);
+                        }
+                        quantities[id] = checked(previous + quantity);
+                        total = checked(total + quantity);
+                    }
+                }
+            }
+            return (total, string.Join(", ", order.Select(id => $"{id} ({quantities[id]})")));
+        }
+
+        //This function will return the item name
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetNameFromBrickLink(string setID)
         {
-            try
-            {
-                string setName = "";
-                Boolean callDB = false;
-                string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
-                if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setNameFromDB;
-                }
-
-                if (callDB)
-                {
-                    setName = updateSetInCache(setID, dbNameAttribute);
-                    if (setName != "No Set Information has been found")
-                    {
-                        return GetSetNameFromBrickLink(setID);
-                    }
-                    else
-                    {
-                        return "No Set Information has been found";
-                    }
-                } else
-                {
-                    return setNameFromDB;
-                }
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbNameAttribute);
         }
 
-        //This function will return the number of minifigures for the set        
+        // Return the total number of minifigures for the set.
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetMiniFigNumberFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setNumberOfMinifiguresFromDB = ReadSetInformationFromDB(setID, dbNumOfMinifigsAttribute);
-
-                if (setNumberOfMinifiguresFromDB == "N/A" || setNumberOfMinifiguresFromDB == "" || setNumberOfMinifiguresFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setNumberOfMinifiguresFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbSetMinifiguresAttribute);
-                return GetSetMiniFigNumberFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbNumOfMinifigsAttribute);
         }
 
-        //This function will return the number of minifigures for the set        
+        // Return the minifigure IDs and their quantities.
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetMiniFigCollectionFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setMiniFigCollectionFromDB = ReadSetInformationFromDB(setID, dbSetMinifiguresAttribute);
-
-                if (setMiniFigCollectionFromDB == "N/A" || setMiniFigCollectionFromDB == "" || setMiniFigCollectionFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setMiniFigCollectionFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbSetMinifiguresAttribute);
-                return GetSetMiniFigCollectionFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbSetMinifiguresAttribute);
         }
 
         //This function will return the item Thumbnail
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetThumbnailFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setThumbnailFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
-
-                if (setThumbnailFromDB == "N/A" || setThumbnailFromDB == "" || setThumbnailFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setThumbnailFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbThumbnailURLAttribute);
-                return GetSetThumbnailFromBrickLink(setID);
-
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbThumbnailURLAttribute);
         }
 
         //This function will return the item image
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetImageFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setImageFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
-
-                if (setImageFromDB == "N/A" || setImageFromDB == "" || setImageFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setImageFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbImageURLAttribute);
-                return GetSetImageFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbImageURLAttribute);
         }
 
         //This function will return the item release year
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetReleaseYearFBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
-
-                if (setYearFromDB == "N/A" || setYearFromDB == "" || setYearFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return setYearFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbYearAttribute);
-                return GetSetReleaseYearFBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbYearAttribute);
         }
 
         //This function will return the item type (Set, gear, etc.)
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetTypeFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string SetTypeFromDB = ReadSetInformationFromDB(setID, dbTypeAttribute);
-                if (SetTypeFromDB == "N/A" || SetTypeFromDB == "" || SetTypeFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return SetTypeFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbTypeAttribute);
-                return GetSetTypeFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbTypeAttribute);
         }
 
         //This function will return the item average price. Note this code is designed to pull the average price for a new set. Some older sets may not have an entry in BrinkLink so you may want to change this method
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetAvgPriceFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string SetAvgPriceFromDB = ReadSetInformationFromDB(setID, dbAvgPriceAttribute);
-
-                if (SetAvgPriceFromDB == "N/A" || SetAvgPriceFromDB == "" || SetAvgPriceFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return SetAvgPriceFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbAvgPriceAttribute);
-                return GetSetAvgPriceFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbAvgPriceAttribute);
         }
 
         //This function will return the item category ID. 
         //It will compare it to the /categories API call from bricklink, and return the category name
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetCategoryFromBrickLink(string setID)
         {
-            try
-            {
-                Boolean callDB = false; 
-                string SetCategoryFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
-
-                if (SetCategoryFromDB == "N/A" || SetCategoryFromDB == "" || SetCategoryFromDB == "no results")
-                {
-                    callDB = true;
-                }
-                else
-                {
-                    return SetCategoryFromDB;
-                }
-
-                if (callDB)
-                    updateSetInCache(setID, dbCategoryIDAttribute);
-                return GetSetCategoryFromBrickLink(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbCategoryIDAttribute);
         }
 
         public static string updateSetInCache(string setID, string dbColumn)
-        // The goal for this new funtion is to streamline the cache usage of the solution. 
-        // Instead of making an API call for each field in the excell file,
-        // this code will first check if the the set is in the cache and if not, populate the cache for the calling function
         {
             try
             {
-                string SetURL = brickLinkSetURL + setID + "-1";
-                string cacheReader = ReadSetInformationFromDB(setID, dbIDAttribute);
-                DateTime today = DateTime.Now;
-                today.ToString("yyyy-MM-dd");
-                string connectionString = @"Data Source=" + DataSource + ";Initial Catalog=" + InitialCatalog + ";User ID=" + DBUser + ";Password=" + DBPassword + ";MultipleActiveResultSets = true";
-                SqlConnection setCacheConnection = new SqlConnection(connectionString);
-                setCacheConnection.Open();
-
-                string setInformation = GetSetInformation(brickLinkSetURL + setID + "-1", "info");
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkSetURL + setID, "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkGearURL + setID, "info");
-                }
-                // 11-3-2022 Added this section to deal with minifigure and sets who catalog ID is not                            
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkMiniFigURL + setID, "info");
-                }
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkPartURL + setID, "info");
-                }
-                // 5-21-2023 Added this section to deal with old booklets
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                {
-                    setInformation = GetSetInformation(brickLinkBooksURL + setID, "info");
-                }
-                // 12/23/2023 Added this section to escape when the set information can't be retrived
-                if (setInformation.Contains("(404) Not Found") || setInformation.Contains("(400) Bad Request") || setInformation == null)
-                    return setInformation = "No Set Information has been found";
-
-                var setObj = JObject.Parse(setInformation);
-                if (!setObj.ToString().Contains("TIMESTAMP"))
-                {
-                    // get set information
-                    string setName = (string)setObj["data"]["name"] ?? "N/A";
-                    string setType = (string)setObj["data"]["type"] ?? "N/A";
-                    string setImageURL = "https:" + (string)setObj["data"]["image_url"] ?? "N/A";
-                    string setThumbnailURL = "https:" + (string)setObj["data"]["thumbnail_url"] ?? "N/A";
-                    string setYear_released = (string)setObj["data"]["year_released"] ?? "N/A";
-
-                    // Get set price
-                    string setAVGPrice = GetSetInformationFromBrickLink(setID, dbAvgPriceAttribute);
-
-                    // get set category
-                    string setCategory_id = GetSetInformationFromBrickLink(setID, dbCategoryIDAttribute);
-
-                    // get set number of parts from brickset
-                    string setPartNum = GetSetAttributeFromBrickSet(setID, brickSetPartNumberAttribute);
-                    if (setPartNum.Contains("BrickSet API limit exceeded"))
-                        setPartNum = "0";
-
-                    // get set number of minifigures
-                    string setMinifigureNum = GetSetInformationFromBrickLink(setID, dbNumOfMinifigsAttribute);
-
-                    // get set UPC
-                    string setUPC = GetSetAttributeFromBrickSet(setID, brickSetUPCAttribute);
-                    if (setUPC.Contains("BrickSet API limit exceeded"))
-                        setUPC = "0";
-
-                    // get set description
-                    string setDescription = GetSetAttributeFromBrickSet(setID, brickSetDescriptionAttribute);
-                    if (setDescription.Contains("BrickSet API limit exceeded"))
-                        setDescription = "";
-
-                    // get set orignal retail price
-                    string setOriginalPrice = GetSetAttributeFromBrickSet(setID, brickSetOriginalSellPriceAttribute + "US");
-                    if (setOriginalPrice.Contains("BrickSet API limit exceeded"))
-                        setOriginalPrice = "";
-
-                    // get set minifigure collection
-                    string setMinifiguresCollection = GetSetInformationFromBrickLink(setID, dbSetMinifiguresAttribute);
-
-                    if (cacheReader != setID)
-                    {
-                        string insertsql = "INSERT INTO dbo.Sets (ID,name,type,categoryID,image_URL,thumbnail_url,year_released,avg_price,date_updated,partnum,minifignum,UPC,description,original_price,minifigset) VALUES (@ID,@name,@type,@categoryID,@image_URL,@thumbnail_url,@year_released,@avg_price,@date_updated,@partnum,@minifignum,@UPC,@description,@original_price,@minifigset)";
-                        SqlCommand insertCommand = new SqlCommand(insertsql, setCacheConnection);
-                        insertCommand.Parameters.AddWithValue("@ID", setID);
-                        insertCommand.Parameters.AddWithValue("@name", WebUtility.HtmlDecode(setName));
-                        insertCommand.Parameters.AddWithValue("@type", setType);
-                        insertCommand.Parameters.AddWithValue("@categoryID", WebUtility.HtmlDecode(setCategory_id));
-                        insertCommand.Parameters.AddWithValue("@image_URL", setImageURL);
-                        insertCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                        insertCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                        insertCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
-                        insertCommand.Parameters.AddWithValue("@date_updated", today);
-                        insertCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
-                        insertCommand.Parameters.AddWithValue("@minifignum", int.Parse(setMinifigureNum));
-                        insertCommand.Parameters.AddWithValue("@UPC", setUPC);
-                        insertCommand.Parameters.AddWithValue("@description", setDescription);
-                        insertCommand.Parameters.AddWithValue("@original_price", setOriginalPrice);
-                        insertCommand.Parameters.AddWithValue("@minifigset", setMinifiguresCollection);
-                        string debugSQL = insertCommand.ToString();
-                        int result = insertCommand.ExecuteNonQuery();
-
-                        // check for errors
-                        if (result < 0)
-                        {
-                            setCacheConnection.Close();
-                            return "There was an error inserting the values to the DB";
-                        }
-                        return "Entry was added to the DB";
-                    }
-                    else
-                    {
-                        if (setName != "N/A")
-                        {
-                            string updatesql = "update dbo.Sets set name=@name,type=@type,categoryID=@category_id,image_URL=@image_URL,thumbnail_url=@thumbnail_url,year_released=@year_released,avg_price=@avg_price,date_updated=@date_updated,partnum=@partnum,minifignum=@minifignum,UPC=@UPC,description=@description,original_price=@original_price,minifigset=@minifigset where ID=@ID";
-                            SqlCommand updateCommand = new SqlCommand(updatesql, setCacheConnection);
-                            updateCommand.Parameters.AddWithValue("@ID", setID);
-                            updateCommand.Parameters.AddWithValue("@name", HttpUtility.HtmlDecode(setName));
-                            updateCommand.Parameters.AddWithValue("@type", setType);
-                            updateCommand.Parameters.AddWithValue("@category_id", HttpUtility.HtmlDecode(setCategory_id));
-                            updateCommand.Parameters.AddWithValue("@image_URL", setImageURL);
-                            updateCommand.Parameters.AddWithValue("@thumbnail_url", setThumbnailURL);
-                            updateCommand.Parameters.AddWithValue("@year_released", setYear_released);
-                            updateCommand.Parameters.AddWithValue("@avg_price", setAVGPrice);
-                            updateCommand.Parameters.AddWithValue("@date_updated", today);
-                            updateCommand.Parameters.AddWithValue("@partnum", int.Parse(setPartNum));
-                            updateCommand.Parameters.AddWithValue("@minifignum", int.Parse(setMinifigureNum));
-                            updateCommand.Parameters.AddWithValue("@UPC", setUPC);
-                            updateCommand.Parameters.AddWithValue("@description", setDescription);
-                            updateCommand.Parameters.AddWithValue("@original_price", setOriginalPrice);
-                            updateCommand.Parameters.AddWithValue("@minifigset", setMinifiguresCollection);
-                            int result = updateCommand.ExecuteNonQuery();
-
-                            // check for errors
-                            if (result < 0)
-                            {
-                                setCacheConnection.Close();
-                                return "There was an error updating the values to the DB";
-                            }
-                        }
-                        return "DB Record updated";
-                    }
-                }
-                else
-                {
-                    // Added this sleep function as BrickLink API expect a 0.5 second delay between different call 
-                    Thread.Sleep(500);
-                    return updateSetInCache(setID, dbColumn);
-                }
+                string id = ValidateSetId(setID);
+                string connectionString = GetCacheConnectionString();
+                return RunSharedLookup(CacheRefreshes, id, () => PopulateSetCache(connectionString, id));
             }
-            catch (Exception ex)
+            catch (Exception error) { return GetLookupError(error); }
+        }
+
+        private static string PopulateSetCache(string connectionString, string setID)
+        {
+            var item = WithProviderSlot(() => FetchSetCacheData(setID));
+            if (item == null)
             {
-                return ex.Message.ToString();
+                return SetNotFound;
+            }
+
+            for (int attempt = 1; ; attempt++)
+            {
+                try { return WriteSetCache(connectionString, setID, item); }
+                catch (SqlException error) when (error.Number == 1205 && attempt < 3)
+                {
+                    Thread.Sleep(50 * attempt);
+                }
             }
         }
 
-        //***** BrickSet ******
-
-        // Calling the BrickSet API
-        private static HttpWebRequest CreateSOAPWebRequest()
+        private static Dictionary<string, object> FetchSetCacheData(string setID)
         {
-            //Making Web Request    
-            HttpWebRequest Req = (HttpWebRequest)WebRequest.Create(@brickSetSOAPUrl);
-            //Content_type    
-            Req.ContentType = "application/soap+xml;charset=utf-8";
-            //HTTP method    
-            Req.Method = "POST";
-            //return HttpWebRequest    
-            return Req;
+            var (item, itemUrl) = FindBrickLinkItem(setID);
+            string name = WebUtility.HtmlDecode((string)item?["name"]);
+            if (string.IsNullOrWhiteSpace(name) || name == NotAvailable)
+            {
+                return null;
+            }
+
+            var prices = GetOptionalBrickLinkData<JObject>(itemUrl + "/price");
+            string categoryId = (string)item["category_id"];
+            var category = string.IsNullOrWhiteSpace(categoryId) ? null :
+                GetOptionalBrickLinkData<JObject>(brickLinkCategoryURL + Uri.EscapeDataString(categoryId));
+            var subsets = GetOptionalBrickLinkData<JArray>(itemUrl + "/subsets");
+            var (minifigureCount, minifigures) = SummarizeMinifigures(subsets);
+
+            JObject brickSet = GetBrickSetItem(setID);
+            var barcode = brickSet?["barcode"] as JObject;
+            var image = brickSet?["image"] as JObject;
+            var details = brickSet?["extendedData"] as JObject;
+            string upc = (string)barcode?["UPC"];
+            string description = WebUtility.HtmlDecode((string)details?["description"]);
+            string imageUrl = NormalizeImageUrl((string)item["image_url"]);
+            string thumbnail = NormalizeImageUrl((string)item["thumbnail_url"]);
+            return new Dictionary<string, object>
+            {
+                [dbNameAttribute] = name,
+                [dbTypeAttribute] = (string)item["type"],
+                [dbCategoryIDAttribute] = WebUtility.HtmlDecode((string)category?["category_name"]),
+                [dbImageURLAttribute] = imageUrl == NotAvailable ? NormalizeImageUrl((string)image?["imageURL"]) : imageUrl,
+                [dbThumbnailURLAttribute] = thumbnail == NotAvailable ? NormalizeImageUrl((string)image?["thumbnailURL"]) : thumbnail,
+                [dbYearAttribute] = (string)item["year_released"],
+                [dbAvgPriceAttribute] = (string)prices?[dbAvgPriceAttribute],
+                ["date_updated"] = DateTime.Now,
+                [dbPartNumberAttribute] = int.TryParse((string)brickSet?["pieces"], out int pieces) ? (int?)pieces : null,
+                [dbNumOfMinifigsAttribute] = minifigureCount,
+                [dbUPCAttribute] = CacheFieldIsMissing(upc) ? (string)barcode?["EAN"] : upc,
+                [dbDescriptoinAttribute] = description?.Replace("<p>", "").Replace("</p>", ""),
+                [dbOrgPriceAttribute] = ExtractBrickSetRetailPrice(brickSet, "US"),
+                [dbSetMinifiguresAttribute] = minifigures
+            };
         }
 
-        private static string GetSetInformationFromBrickSet(string SetID)
+        private static string WriteSetCache(string connectionString, string setID, Dictionary<string, object> fields)
         {
+            const string sql = @"
+;WITH LatestSet AS (
+    SELECT TOP (1) * FROM [dbo].[Sets] WITH (UPDLOCK, HOLDLOCK)
+    WHERE [ID] = @setID
+    " + LatestCacheRowOrder + @"
+)
+UPDATE LatestSet SET
+    [name] = @name, [type] = @type, [categoryID] = @categoryID, [image_url] = @image_url,
+    [thumbnail_url] = @thumbnail_url, [year_released] = @year_released, [avg_price] = @avg_price,
+    [date_updated] = @date_updated, [partnum] = @partnum, [minifignum] = @minifignum,
+    [UPC] = @UPC, [description] = @description, [original_price] = @original_price, [minifigset] = @minifigset;
+
+IF @@ROWCOUNT = 0
+BEGIN
+    INSERT INTO [dbo].[Sets]
+        ([ID], [name], [type], [categoryID], [image_url], [thumbnail_url], [year_released], [avg_price],
+         [date_updated], [partnum], [minifignum], [UPC], [description], [original_price], [minifigset])
+    VALUES
+        (@setID, @name, @type, @categoryID, @image_url, @thumbnail_url, @year_released, @avg_price,
+         @date_updated, @partnum, @minifignum, @UPC, @description, @original_price, @minifigset);
+    SELECT CASE WHEN @@ROWCOUNT = 1 THEN 1 ELSE 0 END;
+END
+ELSE SELECT 2;";
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            using var command = new SqlCommand(sql, connection, transaction);
+            command.Parameters.Add("@setID", SqlDbType.NVarChar, -1).Value = setID;
+            foreach (var field in fields)
+            {
+                var type = field.Key switch
+                {
+                    "date_updated" => SqlDbType.DateTime,
+                    dbPartNumberAttribute or dbNumOfMinifigsAttribute => SqlDbType.Int,
+                    _ => SqlDbType.NVarChar
+                };
+                var parameter = command.Parameters.Add("@" + field.Key, type);
+                if (type == SqlDbType.NVarChar)
+                {
+                    parameter.Size = -1;
+                }
+                parameter.Value = field.Value ?? DBNull.Value;
+            }
+
+            switch (command.ExecuteScalar())
+            {
+                case 1:
+                    transaction.Commit();
+                    return "Entry was added to the DB";
+                case 2:
+                    transaction.Commit();
+                    return "DB Record updated";
+                default:
+                    throw new LookupException("The SQL cache did not save the set.");
+            }
+        }
+
+        private static JObject GetBrickSetItem(string setID)
+        {
+            string number = HasSetVariant(setID) ? setID : setID + "-1";
+            return RunSharedLookup(BrickSetLookups, number, () => RequestBrickSetItem(number));
+        }
+
+        private static JObject RequestBrickSetItem(string number)
+        {
+            var parameters = new JObject { ["setNumber"] = number, ["extendedData"] = 1 };
+            string apiKey = ReadCredential("BrickSetApiKey");
+            string userHash = ReadCredential("BrickSetUserHash");
+            byte[] form = Encoding.UTF8.GetBytes(
+                "apiKey=" + WebUtility.UrlEncode(apiKey) +
+                "&userHash=" + WebUtility.UrlEncode(userHash) +
+                "&params=" + WebUtility.UrlEncode(parameters.ToString(Newtonsoft.Json.Formatting.None)));
             try
             {
-                //Calling CreateSOAPWebRequest method  
-                var ServiceResult = "";
-                var soapNs = @"http://www.w3.org/2003/05/soap-envelope";
-                var brickSetNs = @"https://brickset.com/api/";
-
-
-                HttpWebRequest request = CreateSOAPWebRequest();
-
-                //SOAP Body Request    
-                var doc = new XmlDocument();
-                var root = doc.AppendChild(doc.CreateElement("soap12", "Envelope", soapNs));
-                doc.DocumentElement.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                doc.DocumentElement.SetAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-                XmlDeclaration xml_declaration;
-                xml_declaration = doc.CreateXmlDeclaration("1.0", "utf-8", "yes");
-                XmlElement document_element = doc.DocumentElement;
-                doc.InsertBefore(xml_declaration, document_element);
-                var body = root.AppendChild(doc.CreateElement("soap12", "Body", soapNs));
-                var getSets = body.AppendChild(doc.CreateElement("api", "getSets", brickSetNs));
-
-                getSets.AppendChild(doc.CreateElement("api", "apiKey", brickSetNs)).InnerText = brickSetApiKey;
-                getSets.AppendChild(doc.CreateElement("api", "userHash", brickSetNs)).InnerText = bricksHash;
-                getSets.AppendChild(doc.CreateElement("api", "params", brickSetNs)).InnerText = "{setNumber:'" + SetID + "-1'}";
-
-                using (Stream stream = request.GetRequestStream())
+                using var request = new HttpRequestMessage(HttpMethod.Post, brickSetSOAPUrl + "/getSets");
+                request.Content = new ByteArrayContent(form);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+                using var response = SendProviderRequest(request, "BrickSet");
+                if (!response.IsSuccessStatusCode)
                 {
-                    doc.Save(stream);
+                    throw new LookupException($"BrickSet request failed (status {(int)response.StatusCode}).");
                 }
-                //Geting response from request    
-                using WebResponse Serviceres = request.GetResponse();
-                using (StreamReader rd = new(Serviceres.GetResponseStream()))
-                {
-                    //reading stream    
-                    ServiceResult = rd.ReadToEnd();
-                }
-                return ServiceResult;
+                return ParseBrickSetItem(response.Content.ReadAsStringAsync().GetAwaiter().GetResult(), number);
             }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            finally { Array.Clear(form, 0, form.Length); }
         }
 
-        //This function handles the logic to read information from BrickSet
-        private static string GetSetAttributeFromBrickSet(string setID, string attribute)
+        private static bool HasSetVariant(string setID)
         {
+            int separator = setID.LastIndexOf('-');
+            return separator > 0 && int.TryParse(setID.Substring(separator + 1), NumberStyles.None, CultureInfo.InvariantCulture, out _);
+        }
+
+        private static JObject ParseBrickSetItem(string response, string setNumber)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                throw new LookupException("BrickSet returned an empty response.");
+            }
+
+            JObject payload;
             try
             {
-                string setInformation = "";
-                var SOAPResponse = GetSetInformationFromBrickSet(setID).ToString();
-                int index = SOAPResponse.IndexOf("<?xml");
-                String cleanJSONPayload = SOAPResponse.Substring(0, index);
-                JObject setObj = JObject.Parse(cleanJSONPayload);
-                if (!setObj.ToString().Contains("API limit exceeded") && !setObj.ToString().Contains("\"matches\": 0,"))
-
-                {
-                    if (attribute == brickSetImageURLAttribute || attribute == brickSetThumbnailURLAttribute)
-                    {
-                        setInformation = (string)setObj["sets"][0]["image"][attribute] ?? "N/A";
-                    }
-                    else if (attribute == brickSetUPCAttribute)
-                    {
-                        setInformation = (string)setObj["sets"][0]["barcode"][attribute] ?? "N/A";
-                        if (setInformation == "N/A")
-                            setInformation = (string)setObj["sets"][0]["barcode"]["EAN"] ?? "N/A";
-                    }
-                    else if (attribute == brickSetDescriptionAttribute)
-                    {
-                        setInformation = HttpUtility.HtmlDecode((string)setObj["sets"][0]["extendedData"][attribute]).Replace("<p>", "").Replace("</p>", "") ?? "N/A";
-                    }
-                    else if (attribute.Contains(brickSetOriginalSellPriceAttribute))
-                    {
-                        string countryCode = attribute.Substring(11);
-                        setInformation = (string)setObj["sets"][0]["LEGOCom"][countryCode][brickSetOriginalSellPriceAttribute] ?? "N/A";
-                    }
-                    else
-                    {
-                        setInformation = (string)setObj["sets"][0][attribute] ?? "N/A";
-                    }
-                    return setInformation;
-                }
-                else
-                {
-                    return "BrickSet API limit exceeded or set not found";
-                }
+                using var text = new StringReader(response.TrimStart('\uFEFF', ' ', '\r', '\n', '\t'));
+                using var json = new Newtonsoft.Json.JsonTextReader(text);
+                payload = JObject.Load(json);
             }
-            catch (Exception ex)
+            catch (Newtonsoft.Json.JsonException)
             {
-                return ex.Message.ToString();
+                throw new LookupException("BrickSet returned an invalid response.");
             }
+
+            string status = (string)payload["status"];
+            if (!string.Equals(status, "success", StringComparison.OrdinalIgnoreCase))
+            {
+                string error = (string)payload["message"] ?? string.Empty;
+                throw new LookupException(error.IndexOf("limit exceeded", StringComparison.OrdinalIgnoreCase) >= 0
+                    ? "BrickSet API limit exceeded"
+                    : "BrickSet rejected the lookup. Check the API key and user hash.");
+            }
+
+            if (payload["sets"] is not JArray sets)
+            {
+                if ((int?)payload["matches"] == 0)
+                {
+                    return null;
+                }
+                throw new LookupException("BrickSet did not return the expected set results.");
+            }
+
+            return sets.OfType<JObject>().FirstOrDefault(item =>
+            {
+                string number = (string)item["number"];
+                string variant = (string)item["numberVariant"];
+                return !string.IsNullOrEmpty(number) &&
+                    (string.Equals(number, setNumber, StringComparison.OrdinalIgnoreCase) ||
+                     (!string.IsNullOrEmpty(variant) &&
+                      string.Equals(number + "-" + variant, setNumber, StringComparison.OrdinalIgnoreCase)));
+            });
         }
 
-        //This function will return the item name 
+        private static string ExtractBrickSetRetailPrice(JObject item, string country)
+        {
+            var markets = item?["LEGOCom"] as JObject;
+            var market = markets?[country] as JObject;
+            return (string)market?["retailPrice"] ?? NotAvailable;
+        }
+
+        //This function will return the item name
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetNameFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setNameFromDB = ReadSetInformationFromDB(setID, dbNameAttribute);
-                if (setNameFromDB == "N/A" || setNameFromDB == "" || setNameFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                    {
-                        callDB = true;
-                    }
-                }                
-                
-                if (callDB)
-                    updateSetInCache(setID, dbNameAttribute);
-                return GetSetNameFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbNameAttribute, preserveBrickSetLimitMessage: true);
         }
 
-        //This function will return the item theme 
+        private static string ReadCachedSetField(string setID, string column, bool preserveBrickSetLimitMessage = false)
+        {
+            try
+            {
+                if (preserveBrickSetLimitMessage && setID == "BrickSet API limit exceeded")
+                {
+                    return setID;
+                }
+
+                string id = ValidateSetId(setID);
+                string connectionString = GetCacheConnectionString();
+                string cached = ReadSetInformationFromDB(connectionString, id, column);
+                if (!CacheFieldIsMissing(cached))
+                {
+                    return cached;
+                }
+
+                string refresh = RunSharedLookup(CacheRefreshes, id, () =>
+                    CacheFieldIsMissing(ReadSetInformationFromDB(connectionString, id, column))
+                        ? PopulateSetCache(connectionString, id)
+                        : "Cache already populated");
+                if (refresh is not ("Entry was added to the DB" or "DB Record updated" or "Cache already populated"))
+                {
+                    return refresh;
+                }
+
+                cached = ReadSetInformationFromDB(connectionString, id, column);
+                return CacheFieldIsMissing(cached) ? NotAvailable : cached;
+            }
+            catch (Exception error) { return GetLookupError(error); }
+        }
+
+        //This function will return the item theme
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetThemeFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setPartNumFromDB = ReadSetInformationFromDB(setID, dbCategoryIDAttribute);
-                {
-                    if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
-                    {
-                        if (setID == "BrickSet API limit exceeded")
-                        {
-                            return setID;
-                        }
-                        else 
-                        {
-                            callDB = true;
-                        }                        
-                    }
-                    else
-                    {
-                        return setPartNumFromDB;
-                    }
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbTypeAttribute);
-                return GetSetThemeFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbCategoryIDAttribute, preserveBrickSetLimitMessage: true);
         }
 
-        //This function will return the item image URL 
+        //This function will return the item image URL
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetImageURLFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setImageURLFromDB = ReadSetInformationFromDB(setID, dbImageURLAttribute);
-                if (setImageURLFromDB == "N/A" || setImageURLFromDB == "" || setImageURLFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                    {
-                        callDB = true;
-                    }
-                }
-                else
-                {
-                    return setImageURLFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbImageURLAttribute);
-                return GetSetThemeFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbImageURLAttribute, preserveBrickSetLimitMessage: true);
         }
 
         //This function will return the item thumbnail URL 
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetThumbnailURLFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setThumbnailURLFromDB = ReadSetInformationFromDB(setID, dbThumbnailURLAttribute);
-                {
-                    if (setThumbnailURLFromDB == "N/A" || setThumbnailURLFromDB == "" || setThumbnailURLFromDB == "no results")
-                    {
-                        if (setID == "BrickSet API limit exceeded")
-                        {
-                            return setID;
-                        }
-                        else
-                        {
-                            callDB = true;
-                        }
-                    }
-                    else
-                    {
-                        return setThumbnailURLFromDB;
-                    }
-                }
-                if (callDB)
-                    updateSetInCache(setID, dbThumbnailURLAttribute);
-                return GetSetThumbnailURLFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbThumbnailURLAttribute, preserveBrickSetLimitMessage: true);
         }
 
         //This function will return the item release year 
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetReleaseYearFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setReleaseYearFromDB = ReadSetInformationFromDB(setID, dbYearAttribute);
-
-                if (setReleaseYearFromDB == "N/A" || setReleaseYearFromDB == "" || setReleaseYearFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                    {
-                        callDB = true;
-                    }
-                }
-                else
-                {
-                    return setReleaseYearFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbYearAttribute);
-                return GetSetReleaseYearFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbYearAttribute, preserveBrickSetLimitMessage: true);
         }
 
         //This function will return the item part number
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetPartsNumberFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setPartNumFromDB = ReadSetInformationFromDB(setID, dbPartNumberAttribute);
-                if (setPartNumFromDB == "N/A" || setPartNumFromDB == "" || setPartNumFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                    {
-                        callDB = true;
-                    }
-
-                }
-                else
-                {
-                    return setPartNumFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbPartNumberAttribute);
-                return GetSetPartsNumberFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbPartNumberAttribute, preserveBrickSetLimitMessage: true);
         }
 
         //This function will return the item UPC 
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetUPCFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string setUPCFromDB = ReadSetInformationFromDB(setID, dbUPCAttribute);
-
-                if (setUPCFromDB == "N/A" || setUPCFromDB == "" || setUPCFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                    {
-                        callDB = true;
-                    }
-
-                }
-                else
-                {
-                    return setUPCFromDB;
-
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbUPCAttribute);
-                return GetSetUPCFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbUPCAttribute, preserveBrickSetLimitMessage: true);
         }
 
-        //This function will return the item description 
+        //This function will return the item description
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetDescriptionFromBrickSet(string setID)
         {
-            try
-            {
-                Boolean callDB = false;
-                string SetDescriptionFromDB = ReadSetInformationFromDB(setID, dbDescriptoinAttribute);
-
-                if (SetDescriptionFromDB == "N/A" || SetDescriptionFromDB == "" || SetDescriptionFromDB == "no results")
-                {
-                    if (setID == "BrickSet API limit exceeded")
-                    {
-                        return setID;
-                    }
-                    else
-                        {
-                        callDB = true;
-                    }
-
-                }
-                else
-                {
-                    return SetDescriptionFromDB;
-                }
-                
-                if (callDB)
-                    updateSetInCache(setID, dbDescriptoinAttribute);
-                return GetSetDescriptionFromBrickSet(setID);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            return ReadCachedSetField(setID, dbDescriptoinAttribute, preserveBrickSetLimitMessage: true);
         }
 
         //This function will return the item original retail price
+        [ExcelFunction(IsThreadSafe = true)]
         public static string GetSetOriginalPriceFromBrickSet(string setID, string country)
         {
+            if (country is not ("US" or "UK" or "DE" or "CA"))
+            {
+                return "Wrong country code entered, accetable values are: US, UK, CA and DE";
+            }
+
+            if (country == "US")
+            {
+                return ReadCachedSetField(setID, dbOrgPriceAttribute, preserveBrickSetLimitMessage: true);
+            }
+
             try
             {
-                if (country == "US" || country == "UK" || country == "DE" || country == "CA")
+                if (setID == "BrickSet API limit exceeded")
                 {
-                    Boolean callDB = false;
-                    string setOrgPriceFromDB = ReadSetInformationFromDB(setID, dbOrgPriceAttribute);
-
-                    if (setOrgPriceFromDB == "N/A" || setOrgPriceFromDB == "" || setOrgPriceFromDB == "no results")
-                    {
-                        if (setID == "BrickSet API limit exceeded")
-                        {
-                            return setID;
-                        }
-                        else
-                        {
-                            callDB = true;
-                        }
-
-                    }
-                    else
-                    {
-                        return setOrgPriceFromDB;
-                    }
-                    
-                    if (callDB)
-                        updateSetInCache(setID, dbOrgPriceAttribute);
-                    return GetSetOriginalPriceFromBrickSet(setID, country);
+                    return setID;
                 }
-                else
-                    return "Wrong country code entered, accetable values are: US, UK, CA and DE";
+                string id = ValidateSetId(setID);
+                return WithProviderSlot(() => ExtractBrickSetRetailPrice(GetBrickSetItem(id), country));
             }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
+            catch (Exception error) { return GetLookupError(error); }
         }
 
         public static void Main()

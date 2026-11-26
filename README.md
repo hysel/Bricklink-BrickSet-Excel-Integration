@@ -28,36 +28,42 @@ This project aims to assist you in accessing information from LEGO sets, includi
 9) Run the file
 10) Make sure that the Sets table is created
 
+**Existing legacy cache:** Duplicate set IDs are supported. The add-in reads the newest matching row by `date_updated` and refreshes one matching row in place. It keeps the older rows in the cache. The existing schema can be used as-is.
+
 **Preparing the code:**
 
 1) Obtain the four secret keys to connect to BrickLink API. (For more details, see: https://www.bricklink.com/v2/api/welcome.page)
 2) Obtain your BrickSet API key (For more details, see: https://brickset.com/article/52664/api-version-3-documentation
 3) Once you have your API Key, get your unique Hash by calling the Login method (https://brickset.com/api/v3.asmx?op=login)
-4) If you are running Windows 10 and above, you will need to add a special registry key to your OS to allow support TLS 1.2 (https://support.microsoft.com/en-us/topic/applications-that-rely-on-tls-1-2-strong-encryption-experience-connectivity-failures-after-a-windows-upgrade-c46780c2-f593-8173-8670-f930816f222c)
-5) Open the solution in Visual Studio and update the following attributes:
-        
-        const string brickSetApiKey = "";    // Brickset API Key
+4) The legacy add-in uses TLS 1.2 for BrickLink and BrickSet HTTPS connections. It configures its own HTTP client and uses Windows certificate validation.
+5) Run [Set-LegacyCredentials.ps1](Set-LegacyCredentials.ps1) from the repository root under the Windows account that runs Excel.
 
-        const string bricksHash = "";        // Brickset Hash
-   
-        const string consumerKey = "";        // The Consumer key
-        
-        const string consumerSecret = "";     // The Consumer Secret
-        
-        const string tokenValue = "";         // The Token Value
-        
-        const string tokenSecret = "";        // The Token Secret               
-        
-        const string DataSource = "";         // The DB server name
-        
-        const string InitialCatalog = "";     // The Database NAME
-        
-        const string DBUser = "";             // The DB username
-        
-        const string DBPassword = "";         // The DB password
-        
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Set-LegacyCredentials.ps1
+```
 
-7) Save the File
+The menu shows whether each entry is set or missing without displaying its value. Choose one or more numbers, separated by commas, or press Enter to select all entries. The script masks the credential prompts. Press Enter on an empty credential prompt to keep the existing entry. After each update, the menu reopens and refreshes the status. Choose **0. Exit** when finished. The execution-policy override applies only to the PowerShell process started by this command.
+
+Choose **11. Test Connections** to run a read-only BrickLink catalog request, validate the BrickSet API key and user hash, and check SQL access to the cache table without retrieving rows. The tests run in PowerShell. The menu displays only each service's status. You can run the tests without building the add-in.
+
+For manual setup, open **Credential Manager → Windows Credentials → Add a generic credential**. Create one entry per row. Enter the target under **Internet or network address**, enter `BrickLinkBrickSet` under **User name**, and put the actual value in **Password** for every entry.
+
+| Target | Value for the Password field |
+| --- | --- |
+| `BrickLinkBrickSet/Legacy/BrickLinkConsumerKey` | BrickLink consumer key |
+| `BrickLinkBrickSet/Legacy/BrickLinkConsumerSecret` | BrickLink consumer secret |
+| `BrickLinkBrickSet/Legacy/BrickLinkToken` | BrickLink token |
+| `BrickLinkBrickSet/Legacy/BrickLinkTokenSecret` | BrickLink token secret |
+| `BrickLinkBrickSet/Legacy/BrickSetApiKey` | BrickSet API key |
+| `BrickLinkBrickSet/Legacy/BrickSetUserHash` | BrickSet user hash |
+| `BrickLinkBrickSet/Legacy/SqlUser` | SQL cache username |
+| `BrickLinkBrickSet/Legacy/SqlPassword` | SQL cache password |
+| `BrickLinkBrickSet/Legacy/SqlServer` | SQL Server name or instance |
+| `BrickLinkBrickSet/Legacy/SqlDatabase` | SQL cache database name |
+
+6) Load the add-in from the same Windows account. To change credentials, the server, or the database, edit the relevant entries and recalculate the formulas. The add-in reads the current values when a connection is needed. If you previously configured environment variables for this add-in, remove them from your Windows user settings.
+
+7) To build and debug the legacy add-in, open the solution in Visual Studio.
 8) Press ALT+F7 to open the project properties
 9) Under Debug, select the "Start external program" option
 10) enter the path to your excel.exe file (C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE)
@@ -91,7 +97,12 @@ This project aims to assist you in accessing information from LEGO sets, includi
 - GetSetOriginalPriceFromBrickSet - This function will return the item's original retail price. Acceptable input: US, UK, CA, DE
   
 **Miscellaneous:**
-updateSetInCache - This function will update the item record in the DB
+**Legacy cache and parallel calculation**
+
+- The worksheet lookups can participate in Excel's multithreaded calculation. Simultaneous misses for the same set share an in-flight refresh. Overlapping requests to BrickSet for the same set number also share one response. Up to four provider lookups run at once. SQL checks and writes each set inside a short transaction after the provider calls finish.
+- The cache stores US retail prices. UK, DE, and CA requests use the corresponding BrickSet market directly. A missing regional price returns `N/A`.
+- Missing image links return `N/A` if neither provider supplies a usable URL. Minifigure collections list each ID once with its total quantity.
+- To replace an older cached record, explicitly refresh it with `updateSetInCache(setID, dbColumn)`, then recalculate. The second argument is retained for compatibility. A refresh writes the whole record.
 
 **Known Limitations:**
 - BrickSet limits the number of API Calls, so please ensure you have the proper permission before using it.
